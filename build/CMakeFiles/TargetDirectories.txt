@@ -1,0 +1,2 @@
+/mnt/c/Users/Afonso/Desktop/2024-2025/2ºSemestre/Computação Gráfica/PraticalAss/build/CMakeFiles/edit_cache.dir
+/mnt/c/Users/Afonso/Desktop/2024-2025/2ºSemestre/Computação Gráfica/PraticalAss/build/CMakeFiles/rebuild_cache.dir
