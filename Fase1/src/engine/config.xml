@@ -1,0 +1,10 @@
+<configuration>
+    <camera>
+        <resolution>1920x1080</resolution>
+        <frameRate>60</frameRate>
+    </camera>
+    <filesToLoad>
+        <file>data1.dat</file>
+        <file>data2.dat</file>
+    </filesToLoad>
+</configuration>
