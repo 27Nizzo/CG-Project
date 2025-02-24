@@ -4,16 +4,16 @@
 #include <vector>
 #include <GL/glew.h>
 #include <GL/glut.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+//#include <glm/glm.hpp>
+//#include <glm/gtc/matrix_transform.hpp>
 
 using namespace std;
-using namespace glm;
+//using namespace glm;
 
 struct Camera {
-    vec3 position;
-    vec3 lookAt;
-    vec3 up;
+    vector<float> position;
+    vector<float> lookAt;
+    vector<float> up;
     float fov, nearPlane, farPlane;
 };
 
@@ -31,21 +31,32 @@ void loadConfig(const char* filePath) {
     auto root = doc.child("world");
 
     // Window settings
-    auto windowNode = root.child("window");
-    windowWidth = windowNode.attribute("width").as_int(800);
-    windowHeight = windowNode.attribute("height").as_int(600);
+    auto windowNode = root.child("resolution");
+    if (!windowNode) {
+        cerr << "Window node not found." << endl;
+        exit(1);
+    }
+    windowWidth = windowNode.attribute("width").as_int(1920);
+    windowHeight = windowNode.attribute("height").as_int(1080);
 
     // Camera settings
     auto camNode = root.child("camera");
-    camera.position = vec3(camNode.child("position").attribute("x").as_float(),
-                           camNode.child("position").attribute("y").as_float(),
-                           camNode.child("position").attribute("z").as_float());
-    camera.lookAt = vec3(camNode.child("lookAt").attribute("x").as_float(),
-                         camNode.child("lookAt").attribute("y").as_float(),
-                         camNode.child("lookAt").attribute("z").as_float());
-    camera.up = vec3(camNode.child("up").attribute("x").as_float(),
-                     camNode.child("up").attribute("y").as_float(),
-                     camNode.child("up").attribute("z").as_float());
+    if (!camNode) {
+        cerr << "Camera node not found." << endl;
+        exit(1);
+    }
+    camera.position.push_back(camNode.child("position").attribute("x").as_float());
+    camera.position.push_back(camNode.child("position").attribute("y").as_float());
+    camera.position.push_back(camNode.child("position").attribute("z").as_float());
+
+    camera.lookAt.push_back(camNode.child("lookAt").attribute("x").as_float());
+    camera.lookAt.push_back(camNode.child("lookAt").attribute("y").as_float());
+    camera.lookAt.push_back(camNode.child("lookAt").attribute("z").as_float());
+
+    camera.up.push_back(camNode.child("up").attribute("x").as_float());
+    camera.up.push_back(camNode.child("up").attribute("y").as_float());
+    camera.up.push_back(camNode.child("up").attribute("z").as_float());
+
     auto projNode = camNode.child("projection");
     camera.fov = projNode.attribute("fov").as_float(60.0f);
     camera.nearPlane = projNode.attribute("near").as_float(0.1f);
@@ -71,9 +82,9 @@ void display() {
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(camera.position.x, camera.position.y, camera.position.z,
-              camera.lookAt.x, camera.lookAt.y, camera.lookAt.z,
-              camera.up.x, camera.up.y, camera.up.z);
+    gluLookAt(camera.position[0], camera.position[1], camera.position[2],
+              camera.lookAt[0], camera.lookAt[1], camera.lookAt[2],
+              camera.up[0], camera.up[1], camera.up[2]);
 
     // Desenha um cubo simples como placeholder
     glColor3f(0.5f, 0.8f, 1.0f);
