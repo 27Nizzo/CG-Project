@@ -7,7 +7,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #add_executable(${PROJECT_NAME} main.cpp)
 add_executable(engine ./engine/engine.cpp)
-#add_executable(generator ./generator/generator.cpp)
+add_executable(generator ./generator/generator.cpp)
 
 #add_library(
 #	utils_lib
@@ -33,7 +33,8 @@ add_library(
 #)
 
 # Associa a biblioteca das figuras e dos pontos aos executáveis
-#target_link_libraries(generator utils_lib figures_lib)
+target_link_libraries(generator #utils_lib figures_lib
+)
 target_link_libraries(engine #utils_lib figures_lib 
 pugixml_lib)
 

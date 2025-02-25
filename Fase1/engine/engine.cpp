@@ -1,6 +1,7 @@
 
 #include "pugixml.hpp"
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <GL/glew.h>
 #include <GL/glut.h>
@@ -17,8 +18,16 @@ struct Camera {
     float fov, nearPlane, farPlane;
 };
 
+struct Model {
+    string type; //Define a primitiva que representa o modelo
+    vector<float> vertices; //Guarda os vértices do modelo
+    vector<int> dividers; //Guarda onde começa cada face do modelo
+    vector<string> faces; //Guarda o tipo de face do modelo
+    int numVertices; //Guarda o número de vértices do modelo
+};
+
 Camera camera;
-vector<string> modelFiles;
+vector<Model> modelFiles;
 int windowWidth = 800, windowHeight = 600;
 
 void loadConfig(const char* filePath) {
@@ -45,6 +54,7 @@ void loadConfig(const char* filePath) {
         cerr << "Camera node not found." << endl;
         exit(1);
     }
+
     camera.position.push_back(camNode.child("position").attribute("x").as_float());
     camera.position.push_back(camNode.child("position").attribute("y").as_float());
     camera.position.push_back(camNode.child("position").attribute("z").as_float());
@@ -63,8 +73,48 @@ void loadConfig(const char* filePath) {
     camera.farPlane = projNode.attribute("far").as_float(1000.0f);
 
     // Model files
-    for (auto model : root.child("models").children("model")) {
-        modelFiles.push_back(model.attribute("file").as_string());
+    auto modelNode = root.child("models");
+    if (modelNode) {
+        for (auto model : modelNode.children("model")) {
+            int counter = 0;
+            ifstream file(model.text().as_string());
+
+            string line;
+            Model modelo;
+
+            if (file.is_open()) {
+                // Read each line from the file and store it in the
+                // 'line' variable.
+                while (getline(file, line)) {
+                    if (line == "cone" || line == "cube" || line == "plane" || line == "sphere") {
+                        modelo.type = line;
+                    }
+                    else if (line[0] == 'G') {
+                        modelo.faces.push_back(line);
+                        modelo.dividers.push_back(counter);
+                    }
+                    else {
+                        modelo.vertices.push_back(stof(line));
+                        counter++;
+                    }
+                }
+        
+                // Close the file stream once all lines have been
+                // read.
+                file.close();
+                modelo.numVertices = counter;
+            }
+            else {
+                // Print an error message to the standard error
+                // stream if the file cannot be opened.
+                cerr << "Unable to open file!" << endl;
+            }
+            modelFiles.push_back(modelo);
+        }
+    }
+    else {
+        cerr << "No models found." << endl;
+        //exit(1);
     }
 }
 
@@ -87,8 +137,20 @@ void display() {
               camera.up[0], camera.up[1], camera.up[2]);
 
     // Desenha um cubo simples como placeholder
+    int draws = modelFiles.size();
+    for (int i = 0; i < draws; i++) {
+        if (modelFiles[i].type == "plane") {
+            for(int j = 0; j < modelFiles[i].dividers.size(); j++){
+                glBegin(GL_TRIANGLE_STRIP);
+                for (int k = modelFiles[i].dividers[j]; k < modelFiles[i].dividers[j+1]; k += 3) {
+                    glVertex3f(modelFiles[i].vertices[k], modelFiles[i].vertices[k + 1], modelFiles[i].vertices[k + 2]);
+                }
+                glEnd();
+            }
+        }
+    }
     glColor3f(0.5f, 0.8f, 1.0f);
-    glutWireCube(2.0);
+    //glutWireCube(2.0);
 
     glutSwapBuffers();
 }
@@ -105,7 +167,7 @@ int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(windowWidth, windowHeight);
-    glutCreateWindow("3D Engine with pugixml");
+    glutCreateWindow("Engine bombadão");
 
     glewInit();
     initOpenGL();
