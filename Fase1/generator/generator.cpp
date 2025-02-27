@@ -136,7 +136,20 @@ int main(int argc, char** argv){
                 file << half << endl;
             }
             file << "GL_END" << endl;
-        }
+        } 
+    } else if(primitive.compare("box") == 0) {
+        file << "box" << endl;
+        float length = stof(argv[2]);
+        int divisons = stoi(argv[3]);
+
+        
+
+    } else if(primitive.compare("cone") == 0) {
+
+    } else if(primitive.compare("sphere") == 0) {
+
+    } else {
+        printf("Poh caralho socio");
     }
     return 0;
 }
