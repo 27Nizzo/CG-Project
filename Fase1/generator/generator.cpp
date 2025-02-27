@@ -25,7 +25,7 @@ int main(int argc, char** argv){
 
         for(int i = 0; i < divisions;i++){
             file << "GL_TRIANGLE_STRIP" << endl;
-            for(int j = 0; j < divisions;j++){
+            for(int j = 0; j <= divisions;j++){
                 file << length/2 - j*(length/divisions) << endl;
                 file << 0 << endl;
                 file << length/2 - i*(length/divisions) << endl;
@@ -33,6 +33,109 @@ int main(int argc, char** argv){
                 file << 0 << endl;
                 file << length/2 - (i+1)*(length/divisions) << endl;
             }
+            file << "GL_END" << endl;
+            
+            file << "GL_TRIANGLE_STRIP" << endl;
+            for(int j = 0; j <= divisions;j++){
+                file << length/2 - j*(length/divisions) << endl;
+                file << 0 << endl;
+                file << length/2 - (i+1)*(length/divisions) << endl;
+                file << length/2 - j*(length/divisions) << endl;
+                file << 0 << endl;
+                file << length/2 - i*(length/divisions) << endl;
+            }
+            file << "GL_END" << endl;
+        }
+    }
+
+    if (primitive.compare("box") == 0) {
+        file << "box" << endl;
+        float length = stof(argv[2]);
+        int divisions = stoi(argv[3]);
+        float half = length / 2.0f;
+        float step = length / divisions;
+
+        for (int i = 0; i < divisions; i++) {
+            //Bottom face
+            file << "GL_TRIANGLE_STRIP" << endl;
+            for(int j = 0; j <= divisions; j++){
+                file << half - j*step << endl;
+                file << -half << endl;
+                file << half - (i+1)*step << endl;
+                file << half - j*step << endl;
+                file << -half << endl;
+                file << half - i*step << endl;
+            }
+            file << "GL_END" << endl;
+        }
+
+        for(int i = 0; i < divisions; i++){
+            //Top face
+            file << "GL_TRIANGLE_STRIP" << endl;
+            for(int j = 0; j <= divisions; j++){
+                file << half - j*step << endl;
+                file << half << endl;
+                file << half - i*step << endl;
+                file << half - j*step << endl;
+                file << half << endl;
+                file << half - (i+1)*step << endl;
+            }
+            file << "GL_END" << endl;
+        }
+
+        for(int i = 0; i < divisions; i++){
+            //-X face
+            file << "GL_TRIANGLE_STRIP" << endl;
+            for(int j = 0; j <= divisions; j++){
+                file << -half << endl;
+                file << half - j*step << endl;
+                file << half - i*step << endl;
+                file << -half << endl;
+                file << half - j*step << endl;
+                file << half - (i+1)*step << endl;
+            }
+            file << "GL_END" << endl;
+        }
+        
+        for(int i = 0; i < divisions; i++){
+            //+X face
+            file << "GL_TRIANGLE_STRIP" << endl;
+            for(int j = 0; j <= divisions; j++){
+                file << half << endl;
+                file << half - j*step << endl;
+                file << half - (i+1)*step << endl;
+                file << half << endl;
+                file << half - j*step << endl;
+                file << half - i*step << endl;
+            }
+            file << "GL_END" << endl;
+        }
+
+        for(int i = 0; i < divisions; i++){
+            //-Z face
+            file << "GL_TRIANGLE_STRIP" << endl;
+            for(int j = 0; j <= divisions; j++){
+                file << half - j*step << endl;
+                file << half - i*step << endl;
+                file << -half << endl;
+                file << half - j*step << endl;
+                file << half - (i+1)*step << endl;
+                file << -half << endl;
+            }
+            file << "GL_END" << endl;
+        }
+        for(int i = 0; i < divisions; i++){
+            //+Z face
+            file << "GL_TRIANGLE_STRIP" << endl;
+            for(int j = 0; j <= divisions; j++){
+                file << half - j*step << endl;
+                file << half - (i+1)*step << endl;
+                file << half << endl;
+                file << half - j*step << endl;
+                file << half - i*step << endl;
+                file << half << endl;
+            }
+            file << "GL_END" << endl;
         }
     }
     return 0;

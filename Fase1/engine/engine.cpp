@@ -86,7 +86,7 @@ void loadConfig(const char* filePath) {
                 // Read each line from the file and store it in the
                 // 'line' variable.
                 while (getline(file, line)) {
-                    if (line == "cone" || line == "cube" || line == "plane" || line == "sphere") {
+                    if (line == "cone" || line == "box" || line == "plane" || line == "sphere") {
                         modelo.type = line;
                     }
                     else if (line[0] == 'G') {
@@ -135,12 +135,35 @@ void display() {
     gluLookAt(camera.position[0], camera.position[1], camera.position[2],
               camera.lookAt[0], camera.lookAt[1], camera.lookAt[2],
               camera.up[0], camera.up[1], camera.up[2]);
+    
+    glBegin(GL_LINES);
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glVertex3f(-100.0f, 0.0f, 0.0f);
+        glVertex3f(100.0f, 0.0f, 0.0f);
 
-    // Desenha um cubo simples como placeholder
+        glColor3f(0.0f, 1.0f, 0.0f);
+        glVertex3f(0.0f, -100.0f, 0.0f);
+        glVertex3f(0.0f, 100.0f, 0.0f);
+
+        glColor3f(0.0f, 0.0f, 1.0f);
+        glVertex3f(0.0f, 0.0f, -100.0f);
+        glVertex3f(0.0f, 0.0f, 100.0f);
+    glEnd();
+
+    glColor3f(1.0f, 1.0f, 1.0f);
     int draws = modelFiles.size();
     for (int i = 0; i < draws; i++) {
         if (modelFiles[i].type == "plane") {
-            for(int j = 0; j < modelFiles[i].dividers.size(); j++){
+            for(int j = 0; j < modelFiles[i].dividers.size(); j+=2){
+                glBegin(GL_TRIANGLE_STRIP);
+                for (int k = modelFiles[i].dividers[j]; k < modelFiles[i].dividers[j+1]; k += 3) {
+                    glVertex3f(modelFiles[i].vertices[k], modelFiles[i].vertices[k + 1], modelFiles[i].vertices[k + 2]);
+                }
+                glEnd();
+            }
+        }
+        else if (modelFiles[i].type == "box") {
+            for(int j = 0; j < modelFiles[i].dividers.size(); j+=2){
                 glBegin(GL_TRIANGLE_STRIP);
                 for (int k = modelFiles[i].dividers[j]; k < modelFiles[i].dividers[j+1]; k += 3) {
                     glVertex3f(modelFiles[i].vertices[k], modelFiles[i].vertices[k + 1], modelFiles[i].vertices[k + 2]);
@@ -172,6 +195,10 @@ int main(int argc, char** argv) {
     glewInit();
     initOpenGL();
     glutDisplayFunc(display);
+
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glutMainLoop();
 
     return 0;
