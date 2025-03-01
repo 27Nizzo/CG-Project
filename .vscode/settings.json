@@ -1,8 +1,10 @@
 {
     "git.ignoreLimitWarning": true,
     "files.associations": {
-        "vector": "cpp"
+        "vector": "cpp",
+        "iostream": "cpp",
+        "ostream": "cpp"
     },
-    "cmake.sourceDirectory": "/mnt/c/Users/Afonso/Desktop/2024-2025/2ºSemestre/Computação Gráfica/PraticalAss/Fase1",
+    "cmake.sourceDirectory": "/home/luissilva/CG-Project/Fase1",
     "C_Cpp.errorSquiggles": "enabled"
 }

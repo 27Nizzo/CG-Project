@@ -171,6 +171,20 @@ void display() {
                 glEnd();
             }
         }
+        else if (modelFiles[i].type == "cone") {
+            for(int j = 0; j < modelFiles[i].dividers.size(); j++){
+                if (modelFiles[i].faces[j] == "GL_TRIANGLE_FAN") {
+                    glBegin(GL_TRIANGLE_FAN);
+                } else if (modelFiles[i].faces[j] == "GL_TRIANGLE_STRIP") {
+                    glBegin(GL_TRIANGLE_STRIP);
+                }
+                for (int k = modelFiles[i].dividers[j]; k < modelFiles[i].dividers[j+1]; k += 3) {
+                    glVertex3f(modelFiles[i].vertices[k], modelFiles[i].vertices[k + 1], modelFiles[i].vertices[k + 2]);
+                }
+
+                glEnd();
+            }
+        }
     }
     glColor3f(0.5f, 0.8f, 1.0f);
     //glutWireCube(2.0);

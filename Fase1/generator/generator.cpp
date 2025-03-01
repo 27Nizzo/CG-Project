@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <math.h>
 
 using namespace std;
 
@@ -136,15 +137,57 @@ int main(int argc, char** argv){
                 file << half << endl;
             }
             file << "GL_END" << endl;
-        } 
-    } else if(primitive.compare("box") == 0) {
-        file << "box" << endl;
-        float length = stof(argv[2]);
-        int divisons = stoi(argv[3]);
-
-        
+        }
 
     } else if(primitive.compare("cone") == 0) {
+        file << "cone" << endl;
+        float radius = stof(argv[2]);
+        float height = stof(argv[3]);
+        int slices = stoi(argv[4]);
+        int stacks = stoi(argv[5]);
+
+        float hAngleStep = 360 / slices;
+        float vAngleStep = 90 / stacks;
+
+        // Base circle of the cone
+        file << "GL_TRIANGLE_FAN" << endl;
+        // Vertex at the top
+        file << 0.0f << endl;
+        file << 0.0f << endl;
+        file << 0.0f << endl;
+
+        for (int i = 0; i <= slices; i++) {
+            float angle = i * hAngleStep *  M_PI/180;
+            file << radius * -sin(angle) << endl;
+            file << 0.0f << endl;
+            file << radius * cos(angle) << endl;
+        }
+        file << "GL_END" << endl;
+
+        // Side of the cone
+        for(int i = 0; i <= slices; i++){
+            file << "GL_TRIANGLE_STRIP" << endl;
+            // Vertex at the top
+            file << 0.0f << endl;
+            file << height << endl;
+            file << 0.0f << endl;
+
+            for(int j = 0; j < stacks; j++){
+
+                float hAngle = i * hAngleStep *  M_PI/180;
+                float vAngle = j * vAngleStep *  M_PI/180;
+                file << radiusStep*j * -sin(hAngle) << endl;
+                file << 0.0f << endl;
+                file << radiusStep*j * cos(hAngle) << endl;
+
+                float nextHAngle = (i+1) * hAngleStep *  M_PI/180;
+                file << radiusStep*j * -sin(nextHAngle) << endl;
+                file << 0.0f << endl;
+                file << radiusStep*j * cos(nextHAngle) << endl;
+            }
+            file << "GL_END" << endl;
+
+        }
 
     } else if(primitive.compare("sphere") == 0) {
 
