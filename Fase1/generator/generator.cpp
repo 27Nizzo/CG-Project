@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <math.h>
+#include <cmath>
 
 using namespace std;
 
@@ -146,8 +146,9 @@ int main(int argc, char** argv){
         int slices = stoi(argv[4]);
         int stacks = stoi(argv[5]);
 
-        float hAngleStep = 360 / slices;
-        float vAngleStep = 90 / stacks;
+        float angleStep = 360 / slices;
+        float heightStep = height / stacks;
+        float ratio = radius / height;
 
         // Base circle of the cone
         file << "GL_TRIANGLE_FAN" << endl;
@@ -157,7 +158,7 @@ int main(int argc, char** argv){
         file << 0.0f << endl;
 
         for (int i = 0; i <= slices; i++) {
-            float angle = i * hAngleStep *  M_PI/180;
+            float angle = i * angleStep *  M_PI/180;
             file << radius * -sin(angle) << endl;
             file << 0.0f << endl;
             file << radius * cos(angle) << endl;
@@ -165,7 +166,7 @@ int main(int argc, char** argv){
         file << "GL_END" << endl;
 
         // Side of the cone
-        for(int i = 0; i <= slices; i++){
+        for(int i = 0; i < slices; i++){
             file << "GL_TRIANGLE_STRIP" << endl;
             // Vertex at the top
             file << 0.0f << endl;
@@ -174,25 +175,70 @@ int main(int argc, char** argv){
 
             for(int j = 0; j < stacks; j++){
 
-                float hAngle = i * hAngleStep *  M_PI/180;
-                float vAngle = j * vAngleStep *  M_PI/180;
-                file << radiusStep*j * -sin(hAngle) << endl;
-                file << 0.0f << endl;
-                file << radiusStep*j * cos(hAngle) << endl;
+                float angle = i * angleStep *  M_PI/180;
+                float nextAngle = (i+1) * angleStep *  M_PI/180;
 
-                float nextHAngle = (i+1) * hAngleStep *  M_PI/180;
-                file << radiusStep*j * -sin(nextHAngle) << endl;
-                file << 0.0f << endl;
-                file << radiusStep*j * cos(nextHAngle) << endl;
+                float stackHeight = height - heightStep*(j+1);
+                float stackRadius = (height - stackHeight) * ratio;
+
+                file << stackRadius * sin(angle) << endl;
+                file << stackHeight << endl;
+                file << stackRadius * cos(angle) << endl;
+
+                file << stackRadius * sin(nextAngle) << endl;
+                file << stackHeight << endl;
+                file << stackRadius * cos(nextAngle) << endl;
             }
             file << "GL_END" << endl;
 
         }
 
     } else if(primitive.compare("sphere") == 0) {
+        file << "sphere" << endl;
+
+        float radius = stof(argv[2]);
+        float slices = stof(argv[3]);
+        float stacks = stof(argv[4]);
+
+        float angleStepH = 2*M_PI / slices;
+        float angleStepV = M_PI / stacks;
+
+        for(int i = 0; i < slices; i++){
+            file << "GL_TRIANGLE_STRIP" << endl;
+
+            // Vertex at the top
+            file << 0.0f << endl;
+            file << radius << endl;
+            file << 0.0f << endl;
+
+            for(int j = 0; j < stacks-1; j++){
+
+                float angleV = (j+1) * angleStepV;
+                float angleH = i * angleStepH;
+                float nextAngleH = (i+1) * angleStepH;
+
+                float y = cos(angleV);
+
+                file << radius * sin(angleH) * sin(angleV) << endl;
+                file << radius * y << endl;
+                file << radius * cos(angleH) * sin(angleV) << endl;
+
+                file << radius * sin(nextAngleH) * sin(angleV) << endl;
+                file << radius * y << endl;
+                file << radius * cos(nextAngleH) * sin(angleV) << endl;
+            }
+
+            // Vertex at the bottom
+            file << 0.0f << endl;
+            file << -radius << endl;
+            file << 0.0f << endl;
+
+            file << "GL_END" << endl;
+
+        }
 
     } else {
-        printf("Poh caralho socio");
+        printf("Invalid primitive.\nChoose between a sphere, box, plane or cone.\n");
     }
     return 0;
 }

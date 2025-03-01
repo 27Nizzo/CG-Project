@@ -93,7 +93,7 @@ void loadConfig(const char* filePath) {
                         modelo.faces.push_back(line);
                         modelo.dividers.push_back(counter);
                     }
-                    else {
+                    else if (line != ""){
                         modelo.vertices.push_back(stof(line));
                         counter++;
                     }
@@ -172,12 +172,22 @@ void display() {
             }
         }
         else if (modelFiles[i].type == "cone") {
-            for(int j = 0; j < modelFiles[i].dividers.size(); j++){
+            for(int j = 0; j < modelFiles[i].dividers.size(); j+=2){
                 if (modelFiles[i].faces[j] == "GL_TRIANGLE_FAN") {
                     glBegin(GL_TRIANGLE_FAN);
                 } else if (modelFiles[i].faces[j] == "GL_TRIANGLE_STRIP") {
                     glBegin(GL_TRIANGLE_STRIP);
                 }
+                for (int k = modelFiles[i].dividers[j]; k < modelFiles[i].dividers[j+1]; k += 3) {
+                    glVertex3f(modelFiles[i].vertices[k], modelFiles[i].vertices[k + 1], modelFiles[i].vertices[k + 2]);
+                }
+
+                glEnd();
+            }
+        }
+        else if (modelFiles[i].type == "sphere") {
+            for(int j = 0; j < modelFiles[i].dividers.size(); j+=2){
+                glBegin(GL_TRIANGLE_STRIP);
                 for (int k = modelFiles[i].dividers[j]; k < modelFiles[i].dividers[j+1]; k += 3) {
                     glVertex3f(modelFiles[i].vertices[k], modelFiles[i].vertices[k + 1], modelFiles[i].vertices[k + 2]);
                 }
