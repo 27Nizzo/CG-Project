@@ -136,7 +136,8 @@ void display() {
               camera.lookAt[0], camera.lookAt[1], camera.lookAt[2],
               camera.up[0], camera.up[1], camera.up[2]);
     
-    glBegin(GL_LINES);
+    // uncomment for referencial axis
+    /*glBegin(GL_LINES);
         glColor3f(1.0f, 0.0f, 0.0f);
         glVertex3f(-100.0f, 0.0f, 0.0f);
         glVertex3f(100.0f, 0.0f, 0.0f);
@@ -148,7 +149,7 @@ void display() {
         glColor3f(0.0f, 0.0f, 1.0f);
         glVertex3f(0.0f, 0.0f, -100.0f);
         glVertex3f(0.0f, 0.0f, 100.0f);
-    glEnd();
+    glEnd();*/
 
     glColor3f(1.0f, 1.0f, 1.0f);
     int draws = modelFiles.size();

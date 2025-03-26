@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <string>
+#include <cstring>
 #include <cmath>
 
 using namespace std;
@@ -14,10 +16,21 @@ int main(int argc, char** argv){
         cerr << "Too many arguments" << endl;
         return 1;
     }
-    remove(argv[argc-1]);
+    
+    char filePath[11+strlen(argv[argc-1])] = "";
 
-    ofstream file(argv[argc-1]);
+    strcat(filePath,"../models/");
+    strcat(filePath,argv[argc-1]);
+    remove(filePath);
+    
+    ofstream file(filePath);
     string primitive = argv[1];
+
+    if (!file) {
+		cout << "Error opening file to write.\n";
+		return 1;
+	}
+    
 
     if (primitive.compare("plane") == 0){
         file << "plane" << endl;
@@ -35,7 +48,7 @@ int main(int argc, char** argv){
                 file << length/2 - (i+1)*(length/divisions) << endl;
             }
             file << "GL_END" << endl;
-            
+
             file << "GL_TRIANGLE_STRIP" << endl;
             for(int j = 0; j <= divisions;j++){
                 file << length/2 - j*(length/divisions) << endl;
@@ -49,7 +62,7 @@ int main(int argc, char** argv){
         }
     }
 
-    else if (primitive.compare("box") == 0) {
+    if (primitive.compare("box") == 0) {
         file << "box" << endl;
         float length = stof(argv[2]);
         int divisions = stoi(argv[3]);
@@ -97,7 +110,7 @@ int main(int argc, char** argv){
             }
             file << "GL_END" << endl;
         }
-        
+
         for(int i = 0; i < divisions; i++){
             //+X face
             file << "GL_TRIANGLE_STRIP" << endl;
@@ -143,8 +156,8 @@ int main(int argc, char** argv){
         file << "cone" << endl;
         float radius = stof(argv[2]);
         float height = stof(argv[3]);
-        int slices = stoi(argv[4]);
-        int stacks = stoi(argv[5]);
+        float slices = stoi(argv[4]);
+        float stacks = stoi(argv[5]);
 
         float angleStep = 360 / slices;
         float heightStep = height / stacks;
@@ -157,7 +170,7 @@ int main(int argc, char** argv){
         file << 0.0f << endl;
         file << 0.0f << endl;
 
-        for (int i = 0; i <= slices; i++) {
+        for (int i = 0; i < slices; i++) {
             float angle = i * angleStep *  M_PI/180;
             file << radius * -sin(angle) << endl;
             file << 0.0f << endl;
@@ -236,9 +249,40 @@ int main(int argc, char** argv){
             file << "GL_END" << endl;
 
         }
+    } else if (primitive.compare("torus") == 0) {
+        file << "torus" << endl;
 
-    } else {
-        printf("Invalid primitive.\nChoose between a sphere, box, plane or cone.\n");
+        float innerRadius = stof(argv[2]);
+        float outerRadius = stof(argv[3]);
+        float slices = stof(argv[4]);
+        float stacks = stof(argv[5]);
+
+        float sliceStep = 2 * M_PI / slices;
+        float stackStep = 2 * M_PI / stacks;
+
+        for (int i = 0; i < stacks; i++) {
+            file << "GL_TRIANGLE_STRIP" << endl;
+
+            float stackAngle = i * stackStep;
+            float nextStackAngle = (i + 1) * stackStep;
+
+            for (int j = 0; j <= slices; j++) {
+                float sliceAngle = j * sliceStep;
+
+                file << (outerRadius + innerRadius * cos(sliceAngle)) * cos(stackAngle) << endl;
+                file << innerRadius * sin(sliceAngle) << endl;
+                file << (outerRadius + innerRadius * cos(sliceAngle)) * sin(stackAngle) << endl;
+
+                file << (outerRadius + innerRadius * cos(sliceAngle)) * cos(nextStackAngle) << endl;
+                file << innerRadius * sin(sliceAngle) << endl;
+                file << (outerRadius + innerRadius * cos(sliceAngle)) * sin(nextStackAngle) << endl;
+            }
+            file << "GL_END" << endl;
+        }
     }
+    else {
+        printf("Invalid primitive.\nChoose between a sphere, box, plane, cone or torus.\n");
+    }
+    file.close();
     return 0;
 }
