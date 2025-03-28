@@ -4,7 +4,7 @@
 
  - Go to build directory and inside CMakeCache change CMAKE_HOME_DIRECTORY and Fase*_SOURCE_DIR to current phase
 
- - Next run the command cmake -U "Unix Makefiles" -B "../build" inside the directory of current phase
+ - Next run the command: 'cmake -U "Unix Makefiles" -B "../build"' inside the directory of current phase
 
  ## Run program
 
