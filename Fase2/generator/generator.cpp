@@ -30,7 +30,6 @@ int main(int argc, char** argv){
 		cout << "Error opening file to write.\n";
 		return 1;
 	}
-    
 
     if (primitive.compare("plane") == 0){
         file << "plane" << endl;
@@ -156,6 +155,7 @@ int main(int argc, char** argv){
         file << "cone" << endl;
         float radius = stof(argv[2]);
         float height = stof(argv[3]);
+
         float slices = stoi(argv[4]);
         float stacks = stoi(argv[5]);
 
@@ -171,6 +171,7 @@ int main(int argc, char** argv){
         file << 0.0f << endl;
 
         for (int i = 0; i < slices; i++) {
+
             float angle = i * angleStep *  M_PI/180;
             file << radius * -sin(angle) << endl;
             file << 0.0f << endl;
@@ -283,6 +284,8 @@ int main(int argc, char** argv){
     else {
         printf("Invalid primitive.\nChoose between a sphere, box, plane, cone or torus.\n");
     }
+
     file.close();
+
     return 0;
 }
