@@ -8,6 +8,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include <GL/glut.h>
+#include <math.h>
 //#include <glm/glm.hpp>
 //#include <glm/gtc/matrix_transform.hpp>
 
@@ -49,6 +50,9 @@ Camera camera;
 vector<Model> modelFiles;
 Group mainGroup;
 int windowWidth = 800, windowHeight = 600;
+float cam_x = 1, cam_y = 1, cam_z = 1;
+float raio_cam = 0;
+float alpha_cam = 0, beta_cam = 0;
 
 Group processGroup(pugi::xml_node groupNode){
     Group group;
@@ -243,6 +247,17 @@ void display() {
     glLoadIdentity();
     gluPerspective(camera.fov, (float)windowWidth / windowHeight, camera.nearPlane, camera.farPlane);
 
+    raio_cam = sqrt(pow((camera.position[0]),2) + pow((camera.position[1]),2) +  pow((camera.position[2]),2));
+
+    cam_x = raio_cam * sin(alpha_cam) * cos(beta_cam);
+    cam_y = raio_cam * sin(beta_cam);
+    cam_z = raio_cam * cos(alpha_cam) * cos(beta_cam);
+
+    
+    camera.position[0] = cam_x;
+    camera.position[1] = cam_y;
+    camera.position[2] = cam_z;
+    
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(camera.position[0], camera.position[1], camera.position[2],
@@ -274,6 +289,32 @@ void display() {
     glutSwapBuffers();
 }
 
+void processKeys (unsigned char key, int x, int y){
+
+    float arc = 2 * M_PI;
+
+    switch (key)
+    {
+    case 'w':
+        beta_cam += 0.1;
+        break;
+
+    case 'a':
+        alpha_cam += 0.1;
+        break;
+
+    case 's':
+        beta_cam -= 0.1;
+        break;
+
+    case 'd':
+        alpha_cam -= 0.1;
+        break;
+    }
+
+    glutPostRedisplay();
+}
+
 int main(int argc, char** argv) {
     if (argc < 3) {
         cerr << "Usage: " << argv[0] << " <config directory here>" << " <config.xml>" << endl;
@@ -302,6 +343,8 @@ int main(int argc, char** argv) {
     glewInit();
     initOpenGL();
     glutDisplayFunc(display);
+
+    glutKeyboardFunc(processKeys);
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);

@@ -12,7 +12,7 @@
             <scale x="2" y="0.8" z="1" />
         </transform>
         <models>
-            <model file="sphere.3d"/>
+            <model file="cone.3d"/>
         </models>
     </group>
 </world>
