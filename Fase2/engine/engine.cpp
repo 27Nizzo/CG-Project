@@ -247,20 +247,21 @@ void display() {
     glLoadIdentity();
     gluPerspective(camera.fov, (float)windowWidth / windowHeight, camera.nearPlane, camera.farPlane);
 
+    cam_x = camera.position[0];
+    cam_y = camera.position[1];
+    cam_z = camera.position[2];
+
     raio_cam = sqrt(pow((camera.position[0]),2) + pow((camera.position[1]),2) +  pow((camera.position[2]),2));
 
-    cam_x = raio_cam * sin(alpha_cam) * cos(beta_cam);
-    cam_y = raio_cam * sin(beta_cam);
-    cam_z = raio_cam * cos(alpha_cam) * cos(beta_cam);
+    float arc = 2 * M_PI;
 
-    
-    camera.position[0] = cam_x;
-    camera.position[1] = cam_y;
-    camera.position[2] = cam_z;
+    cam_x = raio_cam * sin(arc * alpha_cam) * cos(arc * beta_cam);
+    cam_y = raio_cam * sin(arc * beta_cam);
+    cam_z = raio_cam * cos(arc * alpha_cam) * cos(arc * beta_cam);
     
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(camera.position[0], camera.position[1], camera.position[2],
+    gluLookAt(cam_x, cam_y, cam_z,
               camera.lookAt[0], camera.lookAt[1], camera.lookAt[2],
               camera.up[0], camera.up[1], camera.up[2]);
     
@@ -290,8 +291,6 @@ void display() {
 }
 
 void processKeys (unsigned char key, int x, int y){
-
-    float arc = 2 * M_PI;
 
     switch (key)
     {
