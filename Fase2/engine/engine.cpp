@@ -290,23 +290,23 @@ void display() {
     glutSwapBuffers();
 }
 
-void processKeys (unsigned char key, int x, int y){
+void processSpecialKeys (int key, int x, int y){
 
     switch (key)
     {
-    case 'w':
+    case GLUT_KEY_UP:
         beta_cam += 0.1;
         break;
 
-    case 'a':
+    case GLUT_KEY_LEFT:
         alpha_cam += 0.1;
         break;
 
-    case 's':
+    case GLUT_KEY_DOWN:
         beta_cam -= 0.1;
         break;
 
-    case 'd':
+    case GLUT_KEY_RIGHT:
         alpha_cam -= 0.1;
         break;
     }
@@ -343,7 +343,7 @@ int main(int argc, char** argv) {
     initOpenGL();
     glutDisplayFunc(display);
 
-    glutKeyboardFunc(processKeys);
+    glutSpecialFunc(processSpecialKeys);
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);

@@ -1,7 +1,7 @@
 <world>
     <window width="1024" height="768" />
     <camera> 
-        <position x="0" y="50" z="100" />
+        <position x="300" y="150" z="300" />
         <lookAt x="0" y="0" z="0" />
         <up x="0" y="1" z="0" />
         <projection fov="45" near="1" far="1000" />
@@ -10,17 +10,17 @@
     <group>
         <!-- Sol -->
         <models> 
-            <model file="\CG-Project\models\planetas\sun.3d" /> <!-- generator sphere 5 20 20 sun.3d -->
+            <model file="sun.3d" /> <!-- generator sphere 5 20 20 sun.3d -->
         </models>
 
         <!-- Mercúrio -->
         <group>
             <transform>
                 <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="10" y="2" z="-5" />
+                <translate x="30" y="0" z="-30" />
             </transform>
             <models>
-                <model file="\CG-Project\models\planetas\mercury.3d" />
+                <model file="mercury.3d" />
             </models>
         </group>
 
@@ -28,10 +28,10 @@
         <group>
             <transform>
                 <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="15" y="-3" z="8" />
+                <translate x="46" y="0" z="46" />
             </transform>
             <models>
-                <model file="\CG-Project\models\planetas\venus.3d" />
+                <model file="venus.3d" />
             </models>
         </group>
 
@@ -39,20 +39,20 @@
         <group>
             <transform>
                 <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="22" y="4" z="-10" />
+                <translate x="-85" y="0" z="0" />
             </transform>
             <models>
-                <model file="\CG-Project\models\planetas\earth.3d" />
+                <model file="earth.3d" />
             </models>
 
             <!-- Lua -->
             <group>
                 <transform>
                     <rotate angle="0" x="0" y="1" z="0" />
-                    <translate x="3" y="-1" z="1" />
+                    <translate x="3" y="0" z="2" />
                 </transform>
                 <models>
-                    <model file="\CG-Project\models\planetas\moon.3d" />
+                    <model file="moon.3d" />
                 </models>
             </group>
         </group>
@@ -61,10 +61,10 @@
         <group>
             <transform>
                 <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="30" y="-5" z="12" />
+                <translate x="100" y="0" z="0" />
             </transform>
             <models>
-                <model file="\CG-Project\models\planetas\mars.3d" />
+                <model file="mars.3d" />
             </models>
         </group>
 
@@ -72,10 +72,10 @@
         <group>
             <transform>
                 <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="50" y="6" z="-20" />
+                <translate x="0" y="0" z="-125" />
             </transform>
             <models>
-                <model file="\CG-Project\models\planetas\jupiter.3d" />
+                <model file="jupiter.3d" />
             </models>
         </group>
 
@@ -83,10 +83,10 @@
         <group>
             <transform>
                 <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="65" y="-4" z="25" />
+                <translate x="0" y="0" z="170" />
             </transform>
             <models>
-                <model file="\CG-Project\models\planetas\saturn.3d" />
+                <model file="saturn.3d" />
             </models>
         </group>
 
@@ -94,10 +94,10 @@
         <group>
             <transform>
                 <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="80" y="5" z="-30" />
+                <translate x="-145" y="0" z="145" />
             </transform>
             <models>
-                <model file="\CG-Project\models\planetas\uranus.3d" />
+                <model file="uranus.3d" />
             </models>
         </group>
 
@@ -105,13 +105,11 @@
         <group>
             <transform>
                 <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="95" y="-3" z="35" />
+                <translate x="-166" y="0" z="-166" />
             </transform>
             <models>
-                <model file="\neptune.3d" />
+                <model file="neptune.3d" />
             </models>
         </group>
     </group>
 </world>
-
-<!-- Sistema solar real onde os planetas nao estão em linha reta -->
