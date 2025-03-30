@@ -51,7 +51,7 @@ vector<Model> modelFiles;
 Group mainGroup;
 int windowWidth = 800, windowHeight = 600;
 float cam_x = 1, cam_y = 1, cam_z = 1;
-float raio_cam = 0;
+float raio_cam = 0, raio_change = 0;
 float alpha_cam = 0, beta_cam = 0;
 
 Group processGroup(pugi::xml_node groupNode){
@@ -253,7 +253,9 @@ void display() {
 
     raio_cam = sqrt(pow((camera.position[0]),2) + pow((camera.position[1]),2) +  pow((camera.position[2]),2));
 
-    float arc = 2 * M_PI;
+    float arc = (2 * M_PI) / 180;
+
+    raio_cam += raio_change;
 
     cam_x = raio_cam * sin(arc * alpha_cam) * cos(arc * beta_cam);
     cam_y = raio_cam * sin(arc * beta_cam);
@@ -267,16 +269,16 @@ void display() {
     
     glBegin(GL_LINES);
         glColor3f(1.0f, 0.0f, 0.0f);
-        glVertex3f(-100.0f, 0.0f, 0.0f);
-        glVertex3f(100.0f, 0.0f, 0.0f);
+        glVertex3f(-500.0f, 0.0f, 0.0f);
+        glVertex3f(500.0f, 0.0f, 0.0f);
 
         glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(0.0f, -100.0f, 0.0f);
-        glVertex3f(0.0f, 100.0f, 0.0f);
+        glVertex3f(0.0f, -500.0f, 0.0f);
+        glVertex3f(0.0f, 500.0f, 0.0f);
 
         glColor3f(0.0f, 0.0f, 1.0f);
-        glVertex3f(0.0f, 0.0f, -100.0f);
-        glVertex3f(0.0f, 0.0f, 100.0f);
+        glVertex3f(0.0f, 0.0f, -500.0f);
+        glVertex3f(0.0f, 0.0f, 500.0f);
     glEnd();
 
     glColor3f(1.0f, 1.0f, 1.0f);
@@ -295,22 +297,35 @@ void processSpecialKeys (int key, int x, int y){
     switch (key)
     {
     case GLUT_KEY_UP:
-        beta_cam += 0.1;
+        beta_cam += 0.5;
         break;
 
     case GLUT_KEY_LEFT:
-        alpha_cam += 0.1;
+        alpha_cam += 1;
         break;
 
     case GLUT_KEY_DOWN:
-        beta_cam -= 0.1;
+        beta_cam -= 0.5;
         break;
 
     case GLUT_KEY_RIGHT:
-        alpha_cam -= 0.1;
+        alpha_cam -= 1;
         break;
     }
 
+    glutPostRedisplay();
+}
+
+void processKeys (unsigned char key, int x, int y){
+    switch (key)
+    {
+    case '+':
+        raio_change += 3;
+        break;
+    case '-':
+        raio_change -= 3;
+        break;
+    }
     glutPostRedisplay();
 }
 
@@ -344,6 +359,7 @@ int main(int argc, char** argv) {
     glutDisplayFunc(display);
 
     glutSpecialFunc(processSpecialKeys);
+    glutKeyboardFunc(processKeys);
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
