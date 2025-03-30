@@ -1,7 +1,7 @@
 <world>
     <window width="1024" height="768" />
     <camera>
-        <position x="200" y="100" z="200" />
+        <position x="-150" y="100" z="200" />
         <lookAt x="0" y="0" z="0" />
         <up x="0" y="1" z="0" />
         <projection fov="45" near="1" far="1000" />
