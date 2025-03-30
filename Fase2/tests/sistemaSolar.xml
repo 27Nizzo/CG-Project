@@ -100,6 +100,18 @@
             <models>
                 <model file="sphere.3d" />
             </models>
+            
+            <!-- Anel de Saturno -->
+            <group>
+                <transform>
+                    <rotate angle="30.0f" x="1" y="0" z="1" />
+                    <translate x="0" y="0" z="0" />
+                    <scale x="0.5" y="0.5" z="0.5" />
+                </transform>
+                <models>
+                    <model file="torus.3d" /> <!-- generator torus 3 16 2 20 torus.3d -->
+                </models>
+            </group>
         </group>
 
         <!-- Urano -->
