@@ -4,23 +4,29 @@
         <position x="300" y="150" z="300" />
         <lookAt x="0" y="0" z="0" />
         <up x="0" y="1" z="0" />
-        <projection fov="45" near="1" far="1000" />
+        <projection fov="45" near="1" far="10000" />
     </camera>
 
     <group>
         <!-- Sol -->
-        <models> 
-            <model file="sun.3d" /> <!-- generator sphere 5 20 20 sun.3d -->
-        </models>
+        <group>
+            <transform>
+                <scale x="20" y="20" z="20" />
+            </transform>
+            <models> 
+                <model file="sphere.3d" /> <!-- generator sphere 1.5 20 20 sphere.3d -->
+            </models>
+        </group>
 
         <!-- Mercúrio -->
         <group>
             <transform>
                 <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="30" y="0" z="-30" />
+                <translate x="45" y="0" z="-45" />
+                <scale x="0.60" y="0.60" z="0.60" />
             </transform>
             <models>
-                <model file="mercury.3d" />
+                <model file="sphere.3d" />
             </models>
         </group>
 
@@ -28,10 +34,11 @@
         <group>
             <transform>
                 <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="46" y="0" z="46" />
+                <translate x="55" y="0" z="55" />
+                <scale x="1.2" y="1.2" z="1.2" />
             </transform>
             <models>
-                <model file="venus.3d" />
+                <model file="sphere.3d" />
             </models>
         </group>
 
@@ -39,10 +46,11 @@
         <group>
             <transform>
                 <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="-85" y="0" z="0" />
+                <translate x="-60" y="0" z="0" />
+                <scale x="1.4" y="1.4" z="1.4"/>
             </transform>
             <models>
-                <model file="earth.3d" />
+                <model file="sphere.3d" />
             </models>
 
             <!-- Lua -->
@@ -50,9 +58,10 @@
                 <transform>
                     <rotate angle="0" x="0" y="1" z="0" />
                     <translate x="3" y="0" z="2" />
+                    <scale x="0.27" y="0.27" z="0.27" />
                 </transform>
                 <models>
-                    <model file="moon.3d" />
+                    <model file="sphere.3d" />
                 </models>
             </group>
         </group>
@@ -61,10 +70,11 @@
         <group>
             <transform>
                 <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="100" y="0" z="0" />
+                <translate x="75" y="0" z="0" />
+                <scale x="0.8" y="0.8" z="0.8" />
             </transform>
             <models>
-                <model file="mars.3d" />
+                <model file="sphere.3d" />
             </models>
         </group>
 
@@ -72,10 +82,11 @@
         <group>
             <transform>
                 <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="0" y="0" z="-125" />
+                <translate x="80" y="0" z="-80" />
+                <scale x="11.21" y="11.21" z="11.21" />
             </transform>
             <models>
-                <model file="jupiter.3d" />
+                <model file="sphere.3d" />
             </models>
         </group>
 
@@ -83,10 +94,11 @@
         <group>
             <transform>
                 <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="0" y="0" z="170" />
+                <translate x="0" y="0" z="100" />
+                <scale x="9.45" y="9.45" z="9.45" />
             </transform>
             <models>
-                <model file="saturn.3d" />
+                <model file="sphere.3d" />
             </models>
         </group>
 
@@ -94,10 +106,11 @@
         <group>
             <transform>
                 <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="-145" y="0" z="145" />
+                <translate x="120" y="0" z="120" />
+                <scale x="4.01" y="4.01" z="4.01" />
             </transform>
             <models>
-                <model file="uranus.3d" />
+                <model file="sphere.3d" />
             </models>
         </group>
 
@@ -105,10 +118,11 @@
         <group>
             <transform>
                 <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="-166" y="0" z="-166" />
+                <translate x="-135" y="0" z="-135" />
+                <scale x="3.88" y="3.88" z="3.88" />
             </transform>
             <models>
-                <model file="neptune.3d" />
+                <model file="sphere.3d" />
             </models>
         </group>
     </group>

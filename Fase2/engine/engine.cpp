@@ -252,7 +252,7 @@ void display() {
 
     raio_cam = sqrt(pow((camera.position[0]),2) + pow((camera.position[1]),2) +  pow((camera.position[2]),2));
 
-    float arc = (2 * M_PI) / 180;
+    float arc = (2 * M_PI) / 360;
 
     raio_cam += raio_change;
 
@@ -297,6 +297,7 @@ void processSpecialKeys (int key, int x, int y){
     {
     case GLUT_KEY_UP:
         beta_cam += 0.5;
+        if (beta_cam > 80) beta_cam = 80;
         break;
 
     case GLUT_KEY_LEFT:
@@ -305,6 +306,7 @@ void processSpecialKeys (int key, int x, int y){
 
     case GLUT_KEY_DOWN:
         beta_cam -= 0.5;
+        if (beta_cam < -80) beta_cam = -80;
         break;
 
     case GLUT_KEY_RIGHT:
