@@ -50,8 +50,9 @@ Camera camera;
 Group mainGroup;
 int windowWidth = 800, windowHeight = 600;
 float cam_x = 1, cam_y = 1, cam_z = 1;
-float raio_cam = 0, raio_change = 0;
+float raio_cam = 0, raio_change = 0, raio_circ = 0;
 float alpha_cam = 0, beta_cam = 0;
+int check = 0;
 
 Group processGroup(pugi::xml_node groupNode){
     Group group;
@@ -246,13 +247,16 @@ void display() {
     glLoadIdentity();
     gluPerspective(camera.fov, (float)windowWidth / windowHeight, camera.nearPlane, camera.farPlane);
 
-    cam_x = camera.position[0];
-    cam_y = camera.position[1];
-    cam_z = camera.position[2];
-
     raio_cam = sqrt(pow((camera.position[0]),2) + pow((camera.position[1]),2) +  pow((camera.position[2]),2));
-
+    raio_circ = sqrt(pow((camera.position[0]),2) + pow((camera.position[2]),2));
     float arc = (2 * M_PI) / 360;
+
+    if (check == 0){
+        alpha_cam = asin(camera.position[0]/raio_circ) / arc;
+        beta_cam = asin(camera.position[1]/raio_cam) / arc;
+        check = 1;
+    }
+
 
     raio_cam += raio_change;
 
