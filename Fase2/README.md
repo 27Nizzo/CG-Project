@@ -8,6 +8,8 @@
 
  ## Run program
 
+ Inside build path:
+ 
  - Generator: ./generator >primitive< >measures< >file_name<
  -- >primitive< : - box
                   - plane
