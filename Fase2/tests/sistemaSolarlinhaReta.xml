@@ -1,58 +1,63 @@
 <world>
     <window width="1024" height="768" />
-    <camera> 
-        <position x="00" y="0" z="300" />
-        <lookAt x="100" y="0" z="0" />
+    <camera>
+        <position x="200" y="100" z="200" />
+        <lookAt x="120" y="0" z="0" />
         <up x="0" y="1" z="0" />
         <projection fov="45" near="1" far="1000" />
     </camera>
 
-    <group>
+    <group> <!-- generator sphere 1 20 20 sphere.3d -->
         <!-- Sol -->
-        <models> 
-            <model file="sun.3d" /> <!-- generator sphere 5 20 20 sun.3d -->
-        </models>
+        <group>
+            <transform>
+                <scale x="20" y="20" z="20" />
+            </transform>
+            <models>
+                <model file="sphere.3d" />
+            </models>
+        </group>
 
         <!-- Mercúrio -->
         <group>
             <transform>
-                <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="43" y="0" z="0" />
+                <translate x="30" y="0" z="0" />
+                <scale x="0.38" y="0.38" z="0.38" />
             </transform>
             <models>
-                <model file="mercury.3d" /> <!-- generator sphere 1 20 20 mercury.3d -->
+                <model file="sphere.3d" />
             </models>
         </group>
 
         <!-- Vénus -->
         <group>
             <transform>
-                <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="65" y="0" z="0" />
+                <translate x="45" y="0" z="0" />
+                <scale x="0.95" y="0.95" z="0.95" />
             </transform>
             <models>
-                <model file="venus.3d" /> <!-- generator sphere 1.5 20 20 venus.3d -->
+                <model file="sphere.3d" />
             </models>
         </group>
 
         <!-- Terra -->
         <group>
             <transform>
-                <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="85" y="0" z="0" />
+                <translate x="60" y="0" z="0" />
+                <scale x="1.0" y="1.0" z="1.0" />
             </transform>
             <models>
-                <model file="earth.3d" /> <!-- generator sphere 2 20 20 earth.3d -->
+                <model file="sphere.3d" />
             </models>
 
             <!-- Lua -->
             <group>
                 <transform>
-                    <rotate angle="0" x="0" y="1" z="0" />
-                    <translate x="3" y="0" z="0" />
+                    <translate x="3" y="3" z="0" />
+                    <scale x="0.27" y="0.27" z="0.27" />
                 </transform>
                 <models>
-                    <model file="moon.3d" /> <!-- generator sphere 0.5 20 20 moon.3d -->
+                    <model file="sphere.3d" />
                 </models>
             </group>
         </group>
@@ -60,58 +65,71 @@
         <!-- Marte -->
         <group>
             <transform>
-                <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="100" y="0" z="0" />
+                <translate x="75" y="0" z="0" />
+                <scale x="0.53" y="0.53" z="0.53" />
             </transform>
             <models>
-                <model file="mars.3d" /> <!-- generator sphere 1.5 20 20 mars.3d -->
+                <model file="sphere.3d" />
             </models>
         </group>
 
         <!-- Júpiter -->
         <group>
             <transform>
-                <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="125" y="0" z="0" />
+                <translate x="100" y="0" z="0" />
+                <scale x="11.2" y="11.2" z="11.2" />
             </transform>
             <models>
-                <model file="jupiter.3d" /> <!-- generator sphere 5 20 20 jupiter.3d -->
+                <model file="sphere.3d" />
             </models>
         </group>
 
         <!-- Saturno -->
         <group>
             <transform>
-                <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="170" y="0" z="0" />
+                <translate x="140" y="0" z="0" />
+                <scale x="9.45" y="9.45" z="9.45" />
             </transform>
             <models>
-                <model file="saturn.3d" /> <!-- generator sphere 4.5 20 20 saturn.3d -->
+                <model file="sphere.3d" />
             </models>
+
+            <!-- Anel de Saturno -->
+            <group>
+                <transform>
+                    <rotate angle="30.0f" x="1" y="0" z="1" />
+                    <translate x="0" y="0" z="0" />
+                    <scale x="0.1" y="0.1" z="0.1" />
+                </transform>
+                <models>
+                    <model file="torus.3d" /> <!-- generator torus 3 16 2 20 torus.3d -->
+                </models>
+            </group>
         </group>
+
 
         <!-- Urano -->
         <group>
             <transform>
-                <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="205" y="0" z="0" />
+                <translate x="175" y="0" z="0" />
+                <scale x="4.0" y="4.0" z="4.0" />
             </transform>
             <models>
-                <model file="uranus.3d" /> <!-- generator sphere 3 20 20 uranus.3d -->
+                <model file="sphere.3d" />
             </models>
         </group>
 
         <!-- Neptuno -->
         <group>
             <transform>
-                <rotate angle="0" x="0" y="1" z="0" />
-                <translate x="235" y="0" z="0" />
+                <translate x="200" y="0" z="0" />
+                <scale x="3.88" y="3.88" z="3.88" />
             </transform>
             <models>
-                <model file="neptune.3d" /> <!-- generator sphere 3 20 20 neptune.3d -->
+                <model file="sphere.3d" />
             </models>
         </group>
     </group>
 </world>
 
-<!-- Sistema solar representativo, está demonstrado em linha reta -->
+        <!-- Sistema solar representativo, está demonstrado em linha reta -->
