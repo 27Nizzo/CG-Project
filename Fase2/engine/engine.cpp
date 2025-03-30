@@ -321,10 +321,10 @@ void processKeys (unsigned char key, int x, int y){
     switch (key)
     {
     case '+':
-        raio_change += 3;
+        raio_change -= 3;
         break;
     case '-':
-        raio_change -= 3;
+        raio_change += 3;
         break;
     }
     glutPostRedisplay();
