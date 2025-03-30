@@ -46,7 +46,6 @@ struct Group {
 };
 
 Camera camera;
-vector<Model> modelFiles;
 Group mainGroup;
 int windowWidth = 800, windowHeight = 600;
 
