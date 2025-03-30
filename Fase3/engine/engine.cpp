@@ -43,7 +43,6 @@ struct Transformation {
 struct File{
     string file;
     float dayPeriod = 0;
-    float yearPeriod = 0;
     Model modelo;
 };
 
@@ -51,6 +50,7 @@ struct Group {
     list<File> files;
     list<Transformation> transformations;
     list<Group> children;
+    int yearPeriod = 0;
 };
 
 bool simulate = false;
@@ -62,6 +62,58 @@ int maxBuffers = 100;
 GLuint buffers[100];
 
 int windowWidth = 800, windowHeight = 600;
+
+Model processVBO(File file){
+    int counter = 0;
+
+    // create path for file
+    char filePath[11+strlen(file.file.c_str())] = "";
+    strcat(filePath,"../models/");
+    strcat(filePath,file.file.c_str());
+    ifstream f(filePath);
+
+    string line;
+    Model modelo;
+
+    if (f.is_open()) {
+        vector<float> p;
+        // Read each line from the file and store it in the
+        // 'line' variable.
+        while (getline(f, line)) {
+            if (line == "cone" || line == "box" || line == "plane" || line == "sphere" || line == "torus") {
+                modelo.type = line;
+            }
+            else if (line[0] == 'G') {
+                modelo.faces.push_back(line);
+                modelo.dividers.push_back(counter/3);
+            }
+            else if (line != "") {
+                p.push_back(stof(line));
+                modelo.vertices.push_back(stof(line));
+                counter++;
+            }
+        }
+
+        // Close the file stream once all lines have been
+        // read.
+        f.close();
+        modelo.vbo = buffer;
+        glBindBuffer(GL_ARRAY_BUFFER, buffers[buffer++]);
+        glBufferData(GL_ARRAY_BUFFER, p.size() * sizeof(float), p.data(), GL_STATIC_DRAW);
+        modelo.numVertices = counter;
+        if (buffer > maxBuffers){
+            cerr << "Max buffers reached" << endl;
+            exit(1);
+        }
+
+    }
+    else {
+        // Print an error message to the standard error
+        // stream if the file cannot be opened.
+        cerr << "Unable to open file!" << endl;
+    }
+    return modelo;
+}
 
 Group processGroup(pugi::xml_node groupNode){
     Group group;
@@ -97,21 +149,24 @@ Group processGroup(pugi::xml_node groupNode){
 
     pugi::xml_node modelsNode = groupNode.child("models");
     for(pugi::xml_node modelNode = modelsNode.child("model"); modelNode; modelNode = modelNode.next_sibling()){
-        File modelo;
-        Model m;
-        modelo.file = modelNode.attribute("file").as_string();
+        File file;
+        file.file = modelNode.attribute("file").as_string();
         if (simulate){
-            modelo.dayPeriod = modelNode.attribute("dayPeriod").as_float();
-            modelo.yearPeriod = modelNode.attribute("yearPeriod").as_float();
+            file.dayPeriod = modelNode.attribute("dayPeriod").as_float();
         }
-        group.files.push_back(modelo);
+        Model m = processVBO(file);
+        file.modelo = m;
+        group.files.push_back(file);
     }
 
     pugi::xml_node groupsNode = groupNode.child("group");
     for(pugi::xml_node childGroupNode = groupsNode; childGroupNode; childGroupNode = childGroupNode.next_sibling()){
         Group childGroup = processGroup(childGroupNode);
         group.children.push_back(childGroup);
+    }
 
+    if (simulate && groupNode.attribute("yearPeriod")){
+        group.yearPeriod = groupNode.attribute("yearPeriod").as_int();
     }
 
     return group;
@@ -167,6 +222,10 @@ void readConfig(const char* filePath) {
 }
 
 void drawFigures(Group group){
+    if (simulate){
+        int elapsedTime = glutGet(GLUT_ELAPSED_TIME);
+        if (group.yearPeriod > 0) glRotatef((float)(elapsedTime / (group.yearPeriod*1000.0f)) * 360.0f, 0, 1, 0);
+    }
     for (Transformation transform : group.transformations){
         if (transform.type == TRANSLATE){
             glTranslatef(transform.x, transform.y, transform.z);
@@ -183,15 +242,19 @@ void drawFigures(Group group){
         glPushMatrix();
 
         Model modelo = file.modelo;
-        cerr << "beforeBind " << modelo.type <<endl;
+
+        if (simulate){
+            int elapsedTime = glutGet(GLUT_ELAPSED_TIME);
+            if (file.dayPeriod > 0) glRotatef((float)(elapsedTime / (file.dayPeriod*1000.0f)) * 360.0f, 0, 1, 0);
+        }
+
         glBindBuffer(GL_ARRAY_BUFFER, buffers[modelo.vbo]);
-        cerr << "afterBind" << endl;
+        glVertexPointer(3, GL_FLOAT, 0, 0);
 
         for(int i = 0; i < modelo.dividers.size(); i+=2){
-            cerr << "file" << endl;
-            if (modelo.faces[i/2] == "GL_TRIANGLE_STRIP") {
+            if (modelo.faces[i] == "GL_TRIANGLE_STRIP") {
                 glDrawArrays(GL_TRIANGLE_STRIP, modelo.dividers[i], modelo.dividers[i+1] - modelo.dividers[i]);
-            } else if (modelo.faces[i/2] == "GL_TRIANGLE_FAN") {
+            } else if (modelo.faces[i] == "GL_TRIANGLE_FAN") {
                 glDrawArrays(GL_TRIANGLE_FAN, modelo.dividers[i], modelo.dividers[i+1] - modelo.dividers[i]);
             }
         }
@@ -241,73 +304,14 @@ void display() {
 
     glColor3f(1.0f, 1.0f, 1.0f);
 
+    glEnableClientState(GL_VERTEX_ARRAY);
     drawFigures(mainGroup);
+    glDisableClientState(GL_VERTEX_ARRAY);
 
     glColor3f(0.5f, 0.8f, 1.0f);
     //glutWireCube(2.0);
 
     glutSwapBuffers();
-}
-
-void processVBO(Group group){
-    for (File m : group.files){
-        int counter = 0;
-
-        // create path for file
-        char filePath[11+strlen(m.file.c_str())] = "";
-        strcat(filePath,"../models/");
-        strcat(filePath,m.file.c_str());
-        ifstream f(filePath);
-
-        string line;
-        Model modelo;
-
-        if (f.is_open()) {
-            vector<float> p;
-            // Read each line from the file and store it in the
-            // 'line' variable.
-            while (getline(f, line)) {
-                if (line == "cone" || line == "box" || line == "plane" || line == "sphere" || line == "torus") {
-                    modelo.type = line;
-                }
-                else if (line[0] == 'G') {
-                    modelo.faces.push_back(line);
-                    modelo.dividers.push_back(counter);
-                }
-                else if (line != "") {
-                    p.push_back(stof(line));
-                    modelo.vertices.push_back(stof(line));
-                    counter++;
-                }
-            }
-    
-            // Close the file stream once all lines have been
-            // read.
-            f.close();
-            glBindBuffer(GL_ARRAY_BUFFER, buffers[buffer]);
-            glBufferData(GL_ARRAY_BUFFER, p.size() * sizeof(float), p.data(), GL_STATIC_DRAW);
-            modelo.vbo = buffer;
-            cerr << modelo.vbo << endl;
-            modelo.numVertices = counter;
-            m.modelo = modelo;
-            buffer++;
-            cerr << buffer << endl;
-            if (buffer > maxBuffers){
-                cerr << "Max buffers reached" << endl;
-                exit(1);
-            }
-
-        }
-        else {
-            // Print an error message to the standard error
-            // stream if the file cannot be opened.
-            cerr << "Unable to open file!" << endl;
-        }
-    }
-
-    for (Group child : group.children){
-        processVBO(child);
-    }
 }
 
 int main(int argc, char** argv) {
@@ -337,10 +341,6 @@ int main(int argc, char** argv) {
     initOpenGL();
     readConfig(filePath);
 
-    processVBO(mainGroup);
-    for (File f : mainGroup.files){
-        cerr << f.modelo.type << endl;
-    }
     glutDisplayFunc(display);
     glutIdleFunc(display);
 

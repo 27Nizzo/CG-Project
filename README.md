@@ -8,14 +8,14 @@
 
  ## Run program
 
- - Generator: ./generator <primitive> <measures> <file_name>
- -- <primitive> : - box
+ - Generator: ./generator >primitive< >measures< >file_name<
+ -- >primitive< : - box
                   - plane
                   - cone
                   - sphere
                   - torus
 
-- Engine: ./engine <config_dir> <config>
--- <config_dir> : - tests
+- Engine: ./engine >config_dir< >config<
+-- >config_dir< : - tests
                   - configs
 
