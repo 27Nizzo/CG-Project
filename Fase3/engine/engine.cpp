@@ -53,6 +53,7 @@ struct Group {
     int yearPeriod = 0;
 };
 
+GLenum mode = GL_LINE;
 bool simulate = false;
 Camera camera;
 
@@ -80,7 +81,7 @@ Model processVBO(File file){
         // Read each line from the file and store it in the
         // 'line' variable.
         while (getline(f, line)) {
-            if (line == "cone" || line == "box" || line == "plane" || line == "sphere" || line == "torus") {
+            if (line == "cone" || line == "box" || line == "plane" || line == "sphere" || line == "torus" || line == "bezier") {
                 modelo.type = line;
             }
             else if (line[0] == 'G') {
@@ -222,8 +223,8 @@ void readConfig(const char* filePath) {
 }
 
 void drawFigures(Group group){
+    int elapsedTime = glutGet(GLUT_ELAPSED_TIME);
     if (simulate){
-        int elapsedTime = glutGet(GLUT_ELAPSED_TIME);
         if (group.yearPeriod > 0) glRotatef((float)(elapsedTime / (group.yearPeriod*1000.0f)) * 360.0f, 0, 1, 0);
     }
     for (Transformation transform : group.transformations){
@@ -231,6 +232,7 @@ void drawFigures(Group group){
             glTranslatef(transform.x, transform.y, transform.z);
         }
         else if (transform.type == ROTATE){
+            glRotatef(-(float)(elapsedTime / (group.yearPeriod*1000.0f)) * 360.0f,0,1,0);
             glRotatef(transform.angle, transform.x, transform.y, transform.z);
         }
         else if (transform.type == SCALE){
@@ -244,8 +246,8 @@ void drawFigures(Group group){
         Model modelo = file.modelo;
 
         if (simulate){
-            int elapsedTime = glutGet(GLUT_ELAPSED_TIME);
-            if (file.dayPeriod > 0) glRotatef((float)(elapsedTime / (file.dayPeriod*1000.0f)) * 360.0f, 0, 1, 0);
+            int elapsedRTime = glutGet(GLUT_ELAPSED_TIME);
+            if (file.dayPeriod > 0) glRotatef((float)(elapsedRTime / (file.dayPeriod*1000.0f)) * 360.0f, 0, 1, 0);
         }
 
         glBindBuffer(GL_ARRAY_BUFFER, buffers[modelo.vbo]);
@@ -314,6 +316,24 @@ void display() {
     glutSwapBuffers();
 }
 
+void processKeys(unsigned char key, int xx, int yy){
+    switch (key) {
+        case 'f':
+            mode = GL_FILL;
+            break;
+
+        case 'l':
+            mode = GL_LINE;
+            break;
+
+        case 'p':
+            mode = GL_POINT;
+            break;
+    }
+    
+    glutPostRedisplay();
+}
+
 int main(int argc, char** argv) {
     if (argc < 3) {
         cerr << "Usage: " << argv[0] << " <config directory here>" << " <config.xml>" << endl;
@@ -344,9 +364,11 @@ int main(int argc, char** argv) {
     glutDisplayFunc(display);
     glutIdleFunc(display);
 
+    glutKeyboardFunc(processKeys);
+
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, mode);
 
     glutMainLoop();
 
