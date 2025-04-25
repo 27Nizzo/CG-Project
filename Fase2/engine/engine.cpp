@@ -8,6 +8,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include <GL/glut.h>
+#include <math.h>
 //#include <glm/glm.hpp>
 //#include <glm/gtc/matrix_transform.hpp>
 
@@ -48,6 +49,10 @@ struct Group {
 Camera camera;
 Group mainGroup;
 int windowWidth = 800, windowHeight = 600;
+float cam_x = 1, cam_y = 1, cam_z = 1;
+float raio_cam = 0, raio_change = 0, raio_circ = 0;
+float alpha_cam = 0, beta_cam = 0;
+int check = 0;
 
 Group processGroup(pugi::xml_node groupNode){
     Group group;
@@ -242,24 +247,41 @@ void display() {
     glLoadIdentity();
     gluPerspective(camera.fov, (float)windowWidth / windowHeight, camera.nearPlane, camera.farPlane);
 
+    raio_cam = sqrt(pow((camera.position[0]),2) + pow((camera.position[1]),2) +  pow((camera.position[2]),2));
+    raio_circ = sqrt(pow((camera.position[0]),2) + pow((camera.position[2]),2));
+    float arc = (2 * M_PI) / 360;
+
+    if (check == 0){
+        alpha_cam = asin(camera.position[0]/raio_circ) / arc;
+        beta_cam = asin(camera.position[1]/raio_cam) / arc;
+        check = 1;
+    }
+
+
+    raio_cam += raio_change;
+
+    cam_x = raio_cam * sin(arc * alpha_cam) * cos(arc * beta_cam);
+    cam_y = raio_cam * sin(arc * beta_cam);
+    cam_z = raio_cam * cos(arc * alpha_cam) * cos(arc * beta_cam);
+    
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(camera.position[0], camera.position[1], camera.position[2],
+    gluLookAt(cam_x, cam_y, cam_z,
               camera.lookAt[0], camera.lookAt[1], camera.lookAt[2],
               camera.up[0], camera.up[1], camera.up[2]);
     
     glBegin(GL_LINES);
         glColor3f(1.0f, 0.0f, 0.0f);
-        glVertex3f(-100.0f, 0.0f, 0.0f);
-        glVertex3f(100.0f, 0.0f, 0.0f);
+        glVertex3f(-500.0f, 0.0f, 0.0f);
+        glVertex3f(500.0f, 0.0f, 0.0f);
 
         glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(0.0f, -100.0f, 0.0f);
-        glVertex3f(0.0f, 100.0f, 0.0f);
+        glVertex3f(0.0f, -500.0f, 0.0f);
+        glVertex3f(0.0f, 500.0f, 0.0f);
 
         glColor3f(0.0f, 0.0f, 1.0f);
-        glVertex3f(0.0f, 0.0f, -100.0f);
-        glVertex3f(0.0f, 0.0f, 100.0f);
+        glVertex3f(0.0f, 0.0f, -500.0f);
+        glVertex3f(0.0f, 0.0f, 500.0f);
     glEnd();
 
     glColor3f(1.0f, 1.0f, 1.0f);
@@ -271,6 +293,45 @@ void display() {
     //glutWireCube(2.0);
 
     glutSwapBuffers();
+}
+
+void processSpecialKeys (int key, int x, int y){
+
+    switch (key)
+    {
+    case GLUT_KEY_UP:
+        beta_cam += 0.5;
+        if (beta_cam > 80) beta_cam = 80;
+        break;
+
+    case GLUT_KEY_LEFT:
+        alpha_cam += 1;
+        break;
+
+    case GLUT_KEY_DOWN:
+        beta_cam -= 0.5;
+        if (beta_cam < -80) beta_cam = -80;
+        break;
+
+    case GLUT_KEY_RIGHT:
+        alpha_cam -= 1;
+        break;
+    }
+
+    glutPostRedisplay();
+}
+
+void processKeys (unsigned char key, int x, int y){
+    switch (key)
+    {
+    case '+':
+        raio_change -= 3;
+        break;
+    case '-':
+        raio_change += 3;
+        break;
+    }
+    glutPostRedisplay();
 }
 
 int main(int argc, char** argv) {
@@ -301,6 +362,9 @@ int main(int argc, char** argv) {
     glewInit();
     initOpenGL();
     glutDisplayFunc(display);
+
+    glutSpecialFunc(processSpecialKeys);
+    glutKeyboardFunc(processKeys);
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
