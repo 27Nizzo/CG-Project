@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
 
 # Project Name
-PROJECT(Fase2)
+PROJECT(Fase3)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -9,13 +9,12 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 add_executable(engine ./engine/engine.cpp)
 add_executable(generator ./generator/generator.cpp)
 
-#add_library(
-#	utils_lib
-#	./utils/ponto.cpp
-#	./utils/ponto.hpp
-#	./utils/figura.cpp
-#	./utils/figura.hpp
-#)
+add_library(
+	aux_lib
+	./aux/matrix.cpp
+	./aux/matrix.hpp
+
+)
 
 add_library(
     pugixml_lib
@@ -33,9 +32,9 @@ add_library(
 #)
 
 # Associa a biblioteca das figuras e dos pontos aos executáveis
-target_link_libraries(generator #utils_lib figures_lib
+target_link_libraries(generator #aux_lib #figures_lib
 )
-target_link_libraries(engine #utils_lib figures_lib 
+target_link_libraries(engine aux_lib #figures_lib 
 pugixml_lib)
 
 # Find OpenGL

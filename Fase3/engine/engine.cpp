@@ -1,4 +1,3 @@
-
 #include "pugixml.hpp"
 #include <iostream>
 #include <fstream>
@@ -8,8 +7,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include <GL/glut.h>
-//#include <glm/glm.hpp>
-//#include <glm/gtc/matrix_transform.hpp>
+#include "../aux/matrix.hpp"
 
 using namespace std;
 //using namespace glm;
@@ -29,6 +27,7 @@ struct Model {
     int numVertices; //Guarda o número de vértices do modelo
     GLuint vbo; //Index do vbo
 };
+
 enum Type {
     TRANSLATE,
     ROTATE,
@@ -37,7 +36,9 @@ enum Type {
 
 struct Transformation {
     Type type;
-    float x, y, z, angle = 0;
+    float x, y, z, angle = 0, time;
+    bool align;
+    list<Point> points;
 };
 
 struct File{
@@ -54,13 +55,17 @@ struct Group {
 };
 
 GLenum mode = GL_LINE;
-bool simulate = false;
 Camera camera;
 
 Group mainGroup;
 int buffer = 0;
 int maxBuffers = 100;
 GLuint buffers[100];
+float prev_y[3] = {0, 1, 0};
+float cam_x = 1, cam_y = 1, cam_z = 1;
+float raio_cam = 0, raio_change = 0, raio_circ = 0;
+float alpha_cam = 0, beta_cam = 0;
+int check = 0;
 
 int windowWidth = 800, windowHeight = 600;
 
@@ -125,9 +130,20 @@ Group processGroup(pugi::xml_node groupNode){
         for(pugi::xml_node childNode = transformNode.first_child(); childNode; childNode = childNode.next_sibling()){
             if (strcmp(childNode.name(),"translate") == 0){
                 transformation.type = TRANSLATE;
+                transformation.time = childNode.attribute("time").as_float();
+                transformation.align = childNode.attribute("align").as_bool();
                 transformation.x = childNode.attribute("x").as_float();
                 transformation.y = childNode.attribute("y").as_float();
                 transformation.z = childNode.attribute("z").as_float();
+
+                Point point;
+                for(pugi::xml_node pointNode = childNode.first_child(); pointNode; pointNode = pointNode.next_sibling()){
+                    point.x = pointNode.attribute("x").as_float();
+                    point.y = pointNode.attribute("y").as_float();
+                    point.z = pointNode.attribute("z").as_float();
+                    transformation.points.push_back(point);
+                }
+
                 group.transformations.push_back(transformation);
             }
             else if (strcmp(childNode.name(),"rotate") == 0){
@@ -136,6 +152,7 @@ Group processGroup(pugi::xml_node groupNode){
                 transformation.y = childNode.attribute("y").as_float();
                 transformation.z = childNode.attribute("z").as_float();
                 transformation.angle = childNode.attribute("angle").as_float();
+                transformation.time = childNode.attribute("time").as_float();
                 group.transformations.push_back(transformation);
             }
             else if (strcmp(childNode.name(),"scale") == 0){
@@ -152,9 +169,8 @@ Group processGroup(pugi::xml_node groupNode){
     for(pugi::xml_node modelNode = modelsNode.child("model"); modelNode; modelNode = modelNode.next_sibling()){
         File file;
         file.file = modelNode.attribute("file").as_string();
-        if (simulate){
-            file.dayPeriod = modelNode.attribute("dayPeriod").as_float();
-        }
+        file.dayPeriod = modelNode.attribute("dayPeriod").as_float();
+
         Model m = processVBO(file);
         file.modelo = m;
         group.files.push_back(file);
@@ -166,9 +182,7 @@ Group processGroup(pugi::xml_node groupNode){
         group.children.push_back(childGroup);
     }
 
-    if (simulate && groupNode.attribute("yearPeriod")){
-        group.yearPeriod = groupNode.attribute("yearPeriod").as_int();
-    }
+    group.yearPeriod = groupNode.attribute("yearPeriod").as_float();
 
     return group;
 }
@@ -181,8 +195,6 @@ void readConfig(const char* filePath) {
     }
 
     pugi::xml_node root = doc.child("world");
-
-    simulate = root.attribute("simulate").as_bool();
 
     // Window settings
     pugi::xml_node windowNode = root.child("window");
@@ -222,18 +234,65 @@ void readConfig(const char* filePath) {
     mainGroup = processGroup(groupNode);
 }
 
+void renderCatmullRomCurve(std::list<Point> points) {
+    float pos[3];
+    float derivada[3];
+    glBegin(GL_LINE_LOOP);
+    float gt;
+    for (gt = 0; gt < 1; gt += 1.0 / 100) {
+        getGlobalCatmullRomPoint(gt, points, pos, derivada);
+        glVertex3f(pos[0], pos[1], pos[2]);
+    }
+    glEnd();
+}
+
 void drawFigures(Group group){
     int elapsedTime = glutGet(GLUT_ELAPSED_TIME);
-    if (simulate){
-        if (group.yearPeriod > 0) glRotatef((float)(elapsedTime / (group.yearPeriod*1000.0f)) * 360.0f, 0, 1, 0);
-    }
+
     for (Transformation transform : group.transformations){
         if (transform.type == TRANSLATE){
-            glTranslatef(transform.x, transform.y, transform.z);
+            if (transform.time == 0){
+                glTranslatef(transform.x, transform.y, transform.z);
+            } else {
+                float pos[3], deriv[3];
+                float gt = ( glutGet(GLUT_ELAPSED_TIME) / 1000.0) / transform.time;
+        
+                getGlobalCatmullRomPoint(gt,transform.points,pos,deriv);
+                renderCatmullRomCurve(transform.points);
+
+                glTranslatef(pos[0], pos[1], pos[2]);
+
+                if(transform.align){
+                    normalize(deriv);
+
+                    float z[3];
+                    product(deriv, prev_y, z);
+                    normalize(z);
+
+                    float y[3];
+                    product(z, deriv, y);
+                    normalize(y);
+
+                    prev_y[0] = y[0];
+                    prev_y[1] = y[1];
+                    prev_y[2] = y[2];
+
+                    float m[16];
+                    buildRotationMatrix(deriv, y, z, m);
+
+                    glMultMatrixf(m);
+                }
+            }
         }
         else if (transform.type == ROTATE){
-            glRotatef(-(float)(elapsedTime / (group.yearPeriod*1000.0f)) * 360.0f,0,1,0);
-            glRotatef(transform.angle, transform.x, transform.y, transform.z);
+            if (transform.time==0){
+                glRotatef(transform.angle,transform.x,transform.y,transform.z);
+            }else{
+                double angle = 360.0 * (glutGet(GLUT_ELAPSED_TIME) / 1000.0) / transform.time;
+                //para que nunca ultrapasse os 360º
+                while (angle > 360) angle -= 360;
+                glRotatef(angle, transform.x, transform.y, transform.z);
+            }
         }
         else if (transform.type == SCALE){
             glScalef(transform.x, transform.y, transform.z);
@@ -245,9 +304,14 @@ void drawFigures(Group group){
 
         Model modelo = file.modelo;
 
-        if (simulate){
-            int elapsedRTime = glutGet(GLUT_ELAPSED_TIME);
-            if (file.dayPeriod > 0) glRotatef((float)(elapsedRTime / (file.dayPeriod*1000.0f)) * 360.0f, 0, 1, 0);
+        if (file.dayPeriod > 0){
+            float elapsedRTime = glutGet(GLUT_ELAPSED_TIME);
+            if (file.dayPeriod > 0) {
+                float angle = (360.0f * elapsedRTime)/(file.dayPeriod*1000.0f);
+                while (angle > 360) angle -= 360;
+
+                glRotatef(angle, 0, 1, 0);
+            }
         }
 
         glBindBuffer(GL_ARRAY_BUFFER, buffers[modelo.vbo]);
@@ -279,14 +343,32 @@ void initOpenGL() {
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glPolygonMode(GL_FRONT_AND_BACK, mode);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(camera.fov, (float)windowWidth / windowHeight, camera.nearPlane, camera.farPlane);
 
+    raio_cam = sqrt(pow((camera.position[0]),2) + pow((camera.position[1]),2) +  pow((camera.position[2]),2));
+    raio_circ = sqrt(pow((camera.position[0]),2) + pow((camera.position[2]),2));
+    float arc = (2 * M_PI) / 360;
+
+    if (check == 0){
+        alpha_cam = asin(camera.position[0]/raio_circ) / arc;
+        beta_cam = asin(camera.position[1]/raio_cam) / arc;
+        check = 1;
+    }
+
+
+    raio_cam += raio_change;
+
+    cam_x = raio_cam * sin(arc * alpha_cam) * cos(arc * beta_cam);
+    cam_y = raio_cam * sin(arc * beta_cam);
+    cam_z = raio_cam * cos(arc * alpha_cam) * cos(arc * beta_cam);
+
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(camera.position[0], camera.position[1], camera.position[2],
+    gluLookAt(cam_x, cam_y, cam_z,
               camera.lookAt[0], camera.lookAt[1], camera.lookAt[2],
               camera.up[0], camera.up[1], camera.up[2]);
     
@@ -316,8 +398,40 @@ void display() {
     glutSwapBuffers();
 }
 
+void processSpecialKeys (int key, int x, int y){
+
+    switch (key)
+    {
+    case GLUT_KEY_UP:
+        beta_cam += 0.5;
+        if (beta_cam > 80) beta_cam = 80;
+        break;
+
+    case GLUT_KEY_LEFT:
+        alpha_cam += 1;
+        break;
+
+    case GLUT_KEY_DOWN:
+        beta_cam -= 0.5;
+        if (beta_cam < -80) beta_cam = -80;
+        break;
+
+    case GLUT_KEY_RIGHT:
+        alpha_cam -= 1;
+        break;
+    }
+
+    glutPostRedisplay();
+}
+
 void processKeys(unsigned char key, int xx, int yy){
     switch (key) {
+        case '+':
+            raio_change -= 3;
+            break;
+        case '-':
+            raio_change += 3;
+            break;
         case 'f':
             mode = GL_FILL;
             break;
@@ -360,15 +474,16 @@ int main(int argc, char** argv) {
     glewInit();
     initOpenGL();
     readConfig(filePath);
+    glutReshapeWindow(windowWidth,windowHeight);
 
     glutDisplayFunc(display);
     glutIdleFunc(display);
 
+    glutSpecialFunc(processSpecialKeys);
     glutKeyboardFunc(processKeys);
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
-    glPolygonMode(GL_FRONT_AND_BACK, mode);
 
     glutMainLoop();
 

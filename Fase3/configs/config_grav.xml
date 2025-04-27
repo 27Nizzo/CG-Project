@@ -5,14 +5,14 @@
         <lookAt x="0" y="0" z="0"/>
         <up x="0" y="1" z="0"/>
     </camera>
-    <group yearPeriod="20">
+    <group yearPeriod="20000">
         <transform>
             <translate x="4" y="0" z="0" />
-            <rotate angle="45" x="0" y="1" z="0" />
+            <rotate angle="0" x="0" y="1" z="0" />
             <scale x="1" y="1" z="1" />
         </transform>
         <models>
-            <model file="bezier.3d" dayPeriod="10"/>
+            <model file="bezier.3d" dayPeriod="10000"/>
         </models>
     </group>
 </world>

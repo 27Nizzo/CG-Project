@@ -360,13 +360,11 @@ int main(int argc, char** argv){
         for(int i = 0; i < numPatches; i++){
             getline(bezier,line);
             vector<int> indices;
-            int index = 0;
             int start = 0;
             int end;
             while ((end = line.find(',', start)) != string::npos) {
                 indices.push_back(stoi(line.substr(start, end - start)));
                 start = end + 2;
-                index += 1;
             }
             indices.push_back(stoi(line.substr(start)));
             patchIndex.push_back(indices);
@@ -379,20 +377,17 @@ int main(int argc, char** argv){
         for(int i = 0; i < numControlPoints; i++){
             getline(bezier,line);
             vector<float> points;
-            int index = 0;
             int start = 0;
             int end;
             while ((end = line.find(',', start)) != string::npos) {
                 points.push_back(stof(line.substr(start, end - start)));
                 start = end + 2;
-                index += 1;
             }
             points.push_back(stof(line.substr(start)));
             controlPoints.push_back(points);
         }
         bezier.close();
 
-        float patchPoints[16][3];
         for(int i = 0; i < numPatches; i++){
             float tesselationStep = 1.0f / tesselation;
             float pontos_x[4][4] = {
@@ -405,29 +400,31 @@ int main(int argc, char** argv){
             float pontos_y[4][4] = {
                 {controlPoints[patchIndex[i][0]][1],controlPoints[patchIndex[i][1]][1],controlPoints[patchIndex[i][2]][1],controlPoints[patchIndex[i][3]][1]},
                 {controlPoints[patchIndex[i][4]][1],controlPoints[patchIndex[i][5]][1],controlPoints[patchIndex[i][6]][1],controlPoints[patchIndex[i][7]][1]},
-                {controlPoints[patchIndex[i][8]][1],controlPoints[patchIndex[i][9]][1],controlPoints[patchIndex[i][11]][1],controlPoints[patchIndex[i][11]][1]},
+                {controlPoints[patchIndex[i][8]][1],controlPoints[patchIndex[i][9]][1],controlPoints[patchIndex[i][10]][1],controlPoints[patchIndex[i][11]][1]},
                 {controlPoints[patchIndex[i][12]][1],controlPoints[patchIndex[i][13]][1],controlPoints[patchIndex[i][14]][1],controlPoints[patchIndex[i][15]][1]}
             };
 
             float pontos_z[4][4] = {
                 {controlPoints[patchIndex[i][0]][2],controlPoints[patchIndex[i][1]][2],controlPoints[patchIndex[i][2]][2],controlPoints[patchIndex[i][3]][2]},
                 {controlPoints[patchIndex[i][4]][2],controlPoints[patchIndex[i][5]][2],controlPoints[patchIndex[i][6]][2],controlPoints[patchIndex[i][7]][2]},
-                {controlPoints[patchIndex[i][8]][2],controlPoints[patchIndex[i][9]][2],controlPoints[patchIndex[i][12]][2],controlPoints[patchIndex[i][11]][2]},
+                {controlPoints[patchIndex[i][8]][2],controlPoints[patchIndex[i][9]][2],controlPoints[patchIndex[i][10]][2],controlPoints[patchIndex[i][11]][2]},
                 {controlPoints[patchIndex[i][12]][2],controlPoints[patchIndex[i][13]][2],controlPoints[patchIndex[i][14]][2],controlPoints[patchIndex[i][15]][2]}
             };
 
             for(int j = 0; j < tesselation; j++){
                 file << "GL_TRIANGLE_STRIP" << endl;
                 for(int k = 0; k <= tesselation; k++){
-                    float ponto[3];
-                    generatePoint(tesselationStep,j,k,*pontos_x, *pontos_y, *pontos_z, ponto);
-                    file << ponto[0] << endl;
-                    file << ponto[1] << endl;
-                    file << ponto[2] << endl;
-                    generatePoint(tesselationStep,j+1,k,*pontos_x, *pontos_y, *pontos_z, ponto);
-                    file << ponto[0] << endl;
-                    file << ponto[1] << endl;
-                    file << ponto[2] << endl;
+                    float point[3];
+                    generatePoint(tesselationStep,j,k,*pontos_x, *pontos_y, *pontos_z, point);
+                    file << point[0] << endl;
+                    file << point[1] << endl;
+                    file << point[2] << endl;
+
+                    float nextPoint[3];
+                    generatePoint(tesselationStep,j+1,k,*pontos_x, *pontos_y, *pontos_z, nextPoint);
+                    file << nextPoint[0] << endl;
+                    file << nextPoint[1] << endl;
+                    file << nextPoint[2] << endl;
                 }
                 file << "GL_END" << endl;
             }
