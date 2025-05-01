@@ -1,0 +1,246 @@
+<world>
+    <window width="1920" height="1080" />
+    <camera> 
+        <position x="160" y="80" z="200" />
+        <lookAt x="0" y="0" z="0" />
+        <up x="0" y="1" z="0" />
+        <projection fov="45" near="1" far="10000" />
+    </camera>
+
+    <lights>
+        <light type="point" posX="0" posY="10" posZ="0" />
+        <light type="directional" dirX="1" dirY="1" dirZ="1" />
+        <light type="spotlight" posX="0" posY="10" posZ="0"
+               dirX="1" dirY="1" dirZ="1"
+               cutoff="45" />
+    </lights>
+
+    <group>
+        <!-- Sol -->
+        <group>
+            <transform>
+                <scale x="20" y="20" z="20" />
+            </transform>
+            <models> 
+                <model file="sphere.3d" dayPeriod="10" />
+                <texture file="CG-Project/Fase4/planetsText/sun/sun.jpg" />
+            </models>
+        </group>
+
+        <!-- Mercúrio -->
+        <group>
+            <transform>
+                <rotate time="10" x="0" y="1" z="0" />
+                <translate x="45" y="0" z="-45" />
+                <scale x="0.60" y="0.60" z="0.60" />
+            </transform>
+            <models>
+                <model file="sphere.3d" dayPeriod="10" />
+                <texture file="CG-Project/Fase4/planetsText/mercury/mercury.jpg" />
+                <color>
+                    <diffuse R="180" G="180" B="180" />
+                    <ambient R="40" G="40" B="40" />
+                    <specular R="30" G="30" B="30" />
+                    <emissive R="0" G="0" B="0" />
+                    <shininess value="10" />
+                </color>
+            </models>
+        </group>
+
+        <!-- Vénus -->
+        <group>
+            <transform>
+                <rotate time="12" x="0" y="1" z="0" />
+                <translate x="55" y="0" z="55" />
+                <scale x="1.2" y="1.2" z="1.2" />
+            </transform>
+            <models>
+                <model file="sphere.3d" dayPeriod="10" />
+                <texture file="CG-Project/Fase4/planetsText/venus/venus.jpg" />
+                <color>
+                    <diffuse R="220" G="200" B="180" />
+                    <ambient R="60" G="50" B="40" />
+                    <specular R="40" G="40" B="40" />
+                    <emissive R="0" G="0" B="0" />
+                    <shininess value="5" />
+                </color>
+            </models>
+        </group>
+
+        <!-- Terra -->
+        <group>
+            <transform>
+                <rotate time="13" x="0" y="1" z="0" />
+                <translate x="-60" y="0" z="0" />
+                <scale x="1.4" y="1.4" z="1.4"/>
+            </transform>
+            <models>
+                <model file="sphere.3d" dayPeriod="10" />
+                <texture file="CG-Project/Fase4/planetsText/earth/earth.jpg" />
+                <color>
+                    <diffuse R="190" G="190" B="210" />
+                    <ambient R="50" G="50" B="60" />
+                    <specular R="60" G="60" B="60" />
+                    <emissive R="0" G="0" B="0" />
+                    <shininess value="8" />
+                </color>
+            </model>
+            </models>
+
+            <!-- Lua -->
+            <group>
+                <transform>
+                    <rotate time="10" x="0" y="1" z="0" />
+                    <translate x="3" y="0" z="2" />
+                    <scale x="0.27" y="0.27" z="0.27" />
+                </transform>
+                <models>
+                    <model file="sphere.3d" dayPeriod="10" />
+                    <texture file="CG-Project/Fase4/planetsText/earth/moon.jpg" />
+                    <color>
+                        <diffuse R="180" G="180" B="180" />
+                        <ambient R="40" G="40" B="40" />
+                        <specular R="20" G="20" B="20" />
+                        <emissive R="0" G="0" B="0" />
+                        <shininess value="4" />
+                    </color>
+                </models>
+            </group>
+        </group>
+
+        <!-- Marte -->
+        <group>
+            <transform>
+                <rotate time="15" x="0" y="1" z="0" />
+                <translate x="75" y="0" z="0" />
+                <scale x="0.8" y="0.8" z="0.8" />
+            </transform>
+            <models>
+                <model file="sphere.3d" dayPeriod="10" />
+                <texture file="CG-Project/Fase4/planetsText/mars/mars.jpg" />
+                <color>
+                    <diffuse R="210" G="100" B="80" />
+                    <ambient R="50" G="30" B="30" />
+                    <specular R="30" G="20" B="20" />
+                    <emissive R="0" G="0" B="0" />
+                    <shininess value="6" />
+                </color>
+            </models>
+        </group>
+
+        <!-- Júpiter -->
+        <group>
+            <transform>
+                <rotate time="20" x="0" y="1" z="0" />
+                <translate x="80" y="0" z="-80" />
+                <scale x="11.21" y="11.21" z="11.21" />
+            </transform>
+            <models>
+                <model file="sphere.3d" dayPeriod="10" />
+                <texture file="CG-Project/Fase4/planetsText/jupiter/jupiter.jpg" />
+                <color>
+                    <diffuse R="190" G="170" B="150" />
+                    <ambient R="50" G="45" B="40" />
+                    <specular R="30" G="30" B="30" />
+                    <emissive R="0" G="0" B="0" />
+                    <shininess value="5" />
+                </color>
+            </models>
+        </group>
+
+        <!-- Saturno -->
+        <group>
+            <transform>
+                <rotate time="25" x="0" y="1" z="0" />
+                <translate x="0" y="0" z="100" />
+                <scale x="9.45" y="9.45" z="9.45" />
+            </transform>
+            <models>
+                <model file="sphere.3d" dayPeriod="10" />
+                <texture file="CG-Project/Fase4/planetsText/saturn/saturn.jpg" />
+                <color>
+                    <diffuse R="210" G="180" B="120" />
+                    <ambient R="50" G="45" B="30" />
+                    <specular R="40" G="40" B="20" />
+                    <emissive R="0" G="0" B="0" />
+                    <shininess value="5" />
+                </color>
+            </models>
+            
+            <!-- Anel de Saturno -->
+            <group>
+                <transform>
+                    <rotate angle="30.0f" x="1" y="0" z="1" />
+                    <translate x="0" y="0" z="0" />
+                    <scale x="0.5" y="0.5" z="0.5" />
+                </transform>
+                <models>
+                    <model file="torus.3d" dayPeriod="10" />
+                    <texture file="CG-Project/Fase4/planetsText/saturn/saturnringcolor.jpg" />	
+                </models>
+            </group>
+        </group>
+
+        <!-- Urano -->
+        <group>
+            <transform>
+                <rotate time="28" x="0" y="1" z="0" />
+                <translate x="120" y="0" z="120" />
+                <scale x="4.01" y="4.01" z="4.01" />
+            </transform>
+            <models>
+                <model file="sphere.3d" dayPeriod="10" />
+                <texture file="CG-Project/Fase4/planetsText/uranus/uranus.jpg" />
+                <color>
+                    <diffuse R="180" G="220" B="220" />
+                    <ambient R="40" G="60" B="60" />
+                    <specular R="50" G="50" B="60" />
+                    <emissive R="0" G="0" B="0" />
+                    <shininess value="6" />
+                </color>
+            </models>
+        </group>
+
+        <!-- Neptuno -->
+        <group>
+            <transform>
+                <rotate time="30" x="0" y="1" z="0" />
+                <translate x="-135" y="0" z="-135" />
+                <scale x="3.88" y="3.88" z="3.88" />
+            </transform>
+            <models>
+                <model file="sphere.3d" dayPeriod="10" />
+                <texture file="CG-Project/Fase4/planetsText/neptune/neptune.jpg" />
+                <color>
+                    <diffuse R="100" G="130" B="200" />
+                    <ambient R="30" G="40" B="60" />
+                    <specular R="60" G="60" B="80" />
+                    <emissive R="0" G="0" B="0" />
+                    <shininess value="7" />
+                </color>
+            </models>
+        </group>
+
+        <!-- Teapot Comet -->
+        <group> 
+            <transform>
+                <rotate time="15" x="0" y="1" z="0" />
+            </transform>
+            <group>
+                <transform>
+                    <translate time="20" align="true">
+                        <point x = "0" y = "0" z = "40" />
+                        <point x = "40" y = "0" z = "0" />
+                        <point x = "0" y = "0" z = "-40" />
+                        <point x = "-40" y = "100" z = "0" />
+                    </translate>
+                    <rotate angle="-90" x="1" y="0" z="0" />
+                    <scale x="1.5" y="1.5" z="1.5" />
+                </transform>
+                <models> 
+                    <model file="bezier_10.3d" />
+                </models>
+            </group>
+        </group>
+    </group>
+</world>
