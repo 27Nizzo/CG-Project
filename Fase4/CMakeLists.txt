@@ -32,7 +32,7 @@ add_library(
 #)
 
 # Associa a biblioteca das figuras e dos pontos aos executáveis
-target_link_libraries(generator #aux_lib #figures_lib
+target_link_libraries(generator aux_lib #figures_lib
 )
 target_link_libraries(engine aux_lib #figures_lib 
 pugixml_lib)
@@ -69,11 +69,16 @@ if(WIN32)
 		message(ERROR ": GLEW not found")
 	endif (NOT EXISTS "${TOOLKITS_FOLDER}/glew/GL/glew.h" OR NOT EXISTS "${TOOLKITS_FOLDER}/glew/glew32.lib")
 
+    if (NOT EXISTS "${TOOLKITS_FOLDER}/devil/IL/il.h" OR NOT EXISTS "${TOOLKITS_FOLDER}/devil/IL/il.h")
+        message(ERROR ": DevIL not found")
+    endif (NOT EXISTS "${TOOLKITS_FOLDER}/devil/IL/il.h" OR NOT EXISTS "${TOOLKITS_FOLDER}/devil/IL/il.h")
+
 
     include_directories(${TOOLKITS_FOLDER}/glut ${TOOLKITS_FOLDER}/glew)
     target_link_libraries(engine ${OPENGL_LIBRARIES} 
         ${TOOLKITS_FOLDER}/glut/glut32.lib
         ${TOOLKITS_FOLDER}/glew/glew32.lib
+        ${TOOLKITS_FOLDER}/devil/devIL.lib
         pugixml_lib)
 
     target_link_libraries(generator ${OPENGL_LIBRARIES} ${TOOLKITS_FOLDER}/glut/glut32.lib
@@ -85,10 +90,11 @@ if(WIN32)
 #										  ${TOOLKITS_FOLDER}/glew/glew32.lib
 #                                         pugixml/src)
 
-    if (EXISTS "${TOOLKITS_FOLDER}/glut/glut32.dll"  AND EXISTS "${TOOLKITS_FOLDER}/glew/glew32.dll")
+    if (EXISTS "${TOOLKITS_FOLDER}/glut/glut32.dll"  AND EXISTS "${TOOLKITS_FOLDER}/glew/glew32.dll" AND EXISTS "${TOOLKITS_FOLDER}/devil/IL/il.h")
         file(COPY ${TOOLKITS_FOLDER}/glut/glut32.dll DESTINATION ${CMAKE_BINARY_DIR})
+        file(COPY ${TOOLKITS_FOLDER}/devil/devil.dll DESTINATION ${CMAKE_BINARY_DIR})
         file(COPY ${TOOLKITS_FOLDER}/glew/glew32.dll DESTINATION ${CMAKE_BINARY_DIR})
-    endif(EXISTS "${TOOLKITS_FOLDER}/glut/glut32.dll"  AND EXISTS "${TOOLKITS_FOLDER}/glew/glew32.dll")
+    endif(EXISTS "${TOOLKITS_FOLDER}/glut/glut32.dll"  AND EXISTS "${TOOLKITS_FOLDER}/glew/glew32.dll" AND EXISTS "${TOOLKITS_FOLDER}/devil/IL/il.h")
 
     #set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT engine)
 
@@ -103,8 +109,12 @@ else(WIN32)
     find_package(GLEW REQUIRED)
     include_directories(${GLEW_INCLUDE_DIRS})
 
-    target_link_libraries(engine ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARIES})
-#    target_link_libraries(generator ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
+    # Find DevIL
+    find_package(DevIL REQUIRED)
+    include_directories(${IL_INCLUDE_DIR})
+
+    target_link_libraries(engine ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARIES} ${IL_LIBRARIES})
+    target_link_libraries(generator ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
 
     if(NOT GLUT_FOUND)
        message(ERROR ": GLUT not found!")

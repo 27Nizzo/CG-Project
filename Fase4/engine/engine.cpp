@@ -8,6 +8,7 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include "../aux/matrix.hpp"
+#include <IL/il.h>
 
 using namespace std;
 //using namespace glm;
@@ -21,11 +22,12 @@ struct Camera {
 
 struct Model {
     string type; //Define a primitiva que representa o modelo
-    vector<float> vertices; //Guarda os vértices do modelo
     vector<int> dividers; //Guarda onde começa cada face do modelo
     vector<string> faces; //Guarda o tipo de face do modelo
-    int numVertices; //Guarda o número de vértices do modelo
     GLuint vbo; //Index do vbo
+    GLuint vboN; //Index vbo das normais
+    GLuint vboT; //Index vbo das texturas
+    GLuint texID; //Index da textura do modelo
 };
 
 enum Type {
@@ -78,27 +80,67 @@ struct Group {
 
 list<Light> lights;
 
-GLenum mode = GL_LINE;
+GLenum mode = GL_FILL;
 Camera camera;
-
-Group mainGroup;
-int buffer = 0;
-int maxBuffers = 100;
-GLuint buffers[100];
-float prev_y[3] = {0, 1, 0};
 float cam_x = 1, cam_y = 1, cam_z = 1;
 float raio_cam = 0, raio_change = 0, raio_circ = 0;
 float alpha_cam = 0, beta_cam = 0;
+
+Group mainGroup;
+
+int buffer = 0;
+int maxBuffers = 100;
+GLuint buffers[100];
+GLuint buffersN[100];
+GLuint buffersT[100];
+
+float prev_y[3] = {0, 1, 0};
 int check = 0;
 
 int windowWidth = 800, windowHeight = 600;
 
+GLuint loadTexture(string t){
+
+    unsigned int i, w, h;
+    unsigned char *imageData;
+    unsigned int texName;
+
+    ilInit();
+	ilEnable(IL_ORIGIN_SET);
+	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+	ilGenImages(1,&i);
+	ilBindImage(i);
+	ilLoadImage((ILstring)t.c_str());
+	w = ilGetInteger(IL_IMAGE_WIDTH);
+	h = ilGetInteger(IL_IMAGE_HEIGHT);
+	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+	imageData = ilGetData();
+
+
+    glGenTextures(1, &texName);
+    glBindTexture(GL_TEXTURE_2D, texName);
+    // wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // filtering
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    return texName;
+}
+
 Model processVBO(File file){
+    if (buffer >= maxBuffers){
+        cerr << "Max buffers reached - too many figures" << endl;
+        exit(1);
+    }
     int counter = 0;
 
     // create path for file
     char filePath[11+strlen(file.file.c_str())] = "";
-    strcat(filePath,"../models/");
+    strcat(filePath,"../Fase4-models/");
     strcat(filePath,file.file.c_str());
     ifstream f(filePath);
 
@@ -107,6 +149,8 @@ Model processVBO(File file){
 
     if (f.is_open()) {
         vector<float> p;
+        vector<float> n;
+        vector<float> t;
         // Read each line from the file and store it in the
         // 'line' variable.
         while (getline(f, line)) {
@@ -118,8 +162,19 @@ Model processVBO(File file){
                 modelo.dividers.push_back(counter/3);
             }
             else if (line != "") {
-                p.push_back(stof(line));
-                modelo.vertices.push_back(stof(line));
+                int start = 0, end, c = 0;
+                while ((end = line.find(';', start)) != string::npos) {
+                    if (c == 0){
+                        p.push_back(stof(line.substr(start, end - start)));
+                    }
+                    else if (c == 1){
+                        n.push_back(stof(line.substr(start, end - start)));
+                    }
+                    start = end + 1;
+                    c++;
+                }
+                if (c == 1) n.push_back(stof(line.substr(start)));
+                else t.push_back(stof(line.substr(start)));
                 counter++;
             }
         }
@@ -128,13 +183,23 @@ Model processVBO(File file){
         // read.
         f.close();
         modelo.vbo = buffer;
-        glBindBuffer(GL_ARRAY_BUFFER, buffers[buffer++]);
+        modelo.vboN = buffer;
+        modelo.vboT = buffer;
+
+        GLuint loadedTexture = loadTexture("../textures/" + file.texture);
+        modelo.texID = loadedTexture;
+        glBindTexture(GL_TEXTURE_2D,loadedTexture);
+
+        glBindBuffer(GL_ARRAY_BUFFER, buffers[buffer]);
         glBufferData(GL_ARRAY_BUFFER, p.size() * sizeof(float), p.data(), GL_STATIC_DRAW);
-        modelo.numVertices = counter;
-        if (buffer > maxBuffers){
-            cerr << "Max buffers reached" << endl;
-            exit(1);
-        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, buffersN[buffer]);
+        glBufferData(GL_ARRAY_BUFFER, n.size() * sizeof(float), n.data(), GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ARRAY_BUFFER, buffersT[buffer]);
+        glBufferData(GL_ARRAY_BUFFER, t.size() * sizeof(float), t.data(), GL_STATIC_DRAW);
+
+        buffer++;
 
     }
     else {
@@ -292,24 +357,24 @@ void readConfig(const char* filePath) {
 
         if (strcmp(lightNode.attribute("type").as_string(),"point") == 0){
             light.type = POINT;
-            light.pos[0] = lightNode.attribute("posX").as_float();
-            light.pos[1] = lightNode.attribute("posY").as_float();
-            light.pos[2] = lightNode.attribute("posZ").as_float();
+            light.pos[0] = lightNode.attribute("posx").as_float();
+            light.pos[1] = lightNode.attribute("posy").as_float();
+            light.pos[2] = lightNode.attribute("posz").as_float();
         }
         else if (strcmp(lightNode.attribute("type").as_string(),"directional") == 0){
             light.type = DIRECTIONAL;
-            light.dir[0] = lightNode.attribute("dirX").as_float();
-            light.dir[1] = lightNode.attribute("dirY").as_float();
-            light.dir[2] = lightNode.attribute("dirZ").as_float();
+            light.dir[0] = lightNode.attribute("dirx").as_float();
+            light.dir[1] = lightNode.attribute("diry").as_float();
+            light.dir[2] = lightNode.attribute("dirz").as_float();
         }
         else if (strcmp(lightNode.attribute("type").as_string(),"spotlight") == 0){
             light.type = SPOTLIGHT;
-            light.pos[0] = lightNode.attribute("posX").as_float();
-            light.pos[1] = lightNode.attribute("posY").as_float();
-            light.pos[2] = lightNode.attribute("posZ").as_float();
-            light.dir[0] = lightNode.attribute("dirX").as_float();
-            light.dir[1] = lightNode.attribute("dirY").as_float();
-            light.dir[2] = lightNode.attribute("dirZ").as_float();
+            light.pos[0] = lightNode.attribute("posx").as_float();
+            light.pos[1] = lightNode.attribute("posy").as_float();
+            light.pos[2] = lightNode.attribute("posz").as_float();
+            light.dir[0] = lightNode.attribute("dirx").as_float();
+            light.dir[1] = lightNode.attribute("diry").as_float();
+            light.dir[2] = lightNode.attribute("dirz").as_float();
             light.cutoff = lightNode.attribute("cutoff").as_float();
         }
         lights.push_back(light);
@@ -438,9 +503,19 @@ void drawFigures(Group group){
         }
 
         setupColor(file.color, texture);
+        if (file.texture != ""){
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D,modelo.texID);
+        }
 
         glBindBuffer(GL_ARRAY_BUFFER, buffers[modelo.vbo]);
         glVertexPointer(3, GL_FLOAT, 0, 0);
+
+        glBindBuffer(GL_ARRAY_BUFFER,buffersN[modelo.vboN]);
+        glNormalPointer(GL_FLOAT,0,0);
+
+        glBindBuffer(GL_ARRAY_BUFFER,buffersT[modelo.vboT]);
+        glTexCoordPointer(2,GL_FLOAT,0,0);
 
         for(int i = 0; i < modelo.dividers.size(); i+=2){
             if (modelo.faces[i] == "GL_TRIANGLE_STRIP") {
@@ -449,7 +524,6 @@ void drawFigures(Group group){
                 glDrawArrays(GL_TRIANGLE_FAN, modelo.dividers[i], modelo.dividers[i+1] - modelo.dividers[i]);
             }
         }
-
         glPopMatrix();
     }
 
@@ -464,11 +538,12 @@ void initOpenGL() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHT0);
     glEnable(GL_LIGHTING);
-    glEnable(GL_TEXTURE_2D);
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glGenBuffers(maxBuffers, buffers);
+    glGenBuffers(maxBuffers,buffersN);
+    glGenBuffers(maxBuffers,buffersT);
 }
 
 void display() {
@@ -522,6 +597,8 @@ void display() {
         }
         lightIndex++;
     }
+    float amb[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb);
     
     glDisable(GL_LIGHTING);
     glBegin(GL_LINES);
@@ -543,7 +620,6 @@ void display() {
 
     glEnableClientState(GL_VERTEX_ARRAY);
     drawFigures(mainGroup);
-    glDisableClientState(GL_VERTEX_ARRAY);
 
     glColor3f(0.5f, 0.8f, 1.0f);
     //glutWireCube(2.0);
@@ -612,14 +688,14 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    char filePath[strlen(argv[1]) + strlen(argv[2]) + 11] = "../Fase3/";
+    char filePath[strlen(argv[1]) + strlen(argv[2]) + 11] = "../Fase4/";
 
     strcat(filePath,argv[1]);
     strcat(filePath,"/");
     strcat(filePath,argv[2]);
   
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     glutInitWindowSize(windowWidth, windowHeight);
     glutCreateWindow("Engine bombadão");
 
@@ -636,6 +712,11 @@ int main(int argc, char** argv) {
     glutKeyboardFunc(processKeys);
 
     glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_RESCALE_NORMAL);
+
+    float amb[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb);
 
     glutMainLoop();
 

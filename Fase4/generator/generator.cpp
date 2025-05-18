@@ -4,6 +4,7 @@
 #include <string>
 #include <cstring>
 #include <cmath>
+#include "../aux/matrix.hpp"
 
 using namespace std;
 
@@ -13,15 +14,6 @@ float bMatrix[4][4] = {
     {-3.0f, 3.0f, 0.0f, 0.0f},
     {1.0f, 0.0f, 0.0f, 0.0f}
 };
-
-void multMatrixVector(float* m, float* v, float* result){
-    for(int i = 0; i < 4; i++){
-        result[i] = 0;
-        for(int j = 0; j < 4; j++){
-            result[i] += m[i*4+j] * v[j];
-        }
-    }
-}
 
 float multVectorVector(float* v1, float* v2){
     float acc = 0;
@@ -65,6 +57,61 @@ void generatePoint(float step, int k, int j, float* pontos_x, float* pontos_y, f
 	ponto[2]=result_Z;
 }
 
+void generateNormal(float step, int k, int j, float* pontos_x, float* pontos_y, float* pontos_z, float* normal){
+    float v=step*k;
+	float u=step*j;
+				
+	float u_array[4] = {u * u * u, u * u, u, 1};
+    float ud_array[4] = {3 * u * u, 2 * u, 1, 0};
+	float v_array[4] = {v * v * v, v * v, v, 1}; //Vertical
+    float vd_array[4] = {3 * v * v, 2 * v, 1, 0}; //Vertical
+
+	float transpostaM_V[4]={0};
+	multMatrixVector(*bMatrix, v_array, transpostaM_V);
+
+    float transpostaM_VD[4]={0};
+	multMatrixVector(*bMatrix, vd_array, transpostaM_VD);
+
+    float mulX[4];
+	float mulY[4];
+	float mulZ[4];
+	multMatrixVector(pontos_x, transpostaM_V, mulX);
+	multMatrixVector(pontos_y, transpostaM_V, mulY);
+	multMatrixVector(pontos_z, transpostaM_V, mulZ);
+
+	float M_mulX[4];
+	float M_mulY[4];
+	float M_mulZ[4];
+	multMatrixVector(*bMatrix, mulX, M_mulX);
+	multMatrixVector(*bMatrix, mulY, M_mulY);
+	multMatrixVector(*bMatrix, mulZ, M_mulZ);
+
+	float result_X=multVectorVector(ud_array, M_mulX);
+	float result_Y=multVectorVector(ud_array, M_mulY);
+	float result_Z=multVectorVector(ud_array, M_mulZ);
+
+    float result_u[3] = {result_X, result_Y, result_Z};
+
+	multMatrixVector(pontos_x, transpostaM_VD, mulX);
+	multMatrixVector(pontos_y, transpostaM_VD, mulY);
+	multMatrixVector(pontos_z, transpostaM_VD, mulZ);
+
+	multMatrixVector(*bMatrix, mulX, M_mulX);
+	multMatrixVector(*bMatrix, mulY, M_mulY);
+	multMatrixVector(*bMatrix, mulZ, M_mulZ);
+
+	result_X=multVectorVector(u_array, M_mulX);
+	result_Y=multVectorVector(u_array, M_mulY);
+	result_Z=multVectorVector(u_array, M_mulZ);
+
+	float result_v[3] = {result_X, result_Y, result_Z};
+
+    normalize(result_u);
+    normalize(result_v);
+    product(result_v,result_u,normal);
+    normalize(normal);
+}
+
 int main(int argc, char** argv){
     if (argc < 5) {
         cerr << "Too few arguments" << endl;
@@ -77,7 +124,7 @@ int main(int argc, char** argv){
     
     char filePath[11+strlen(argv[argc-1])] = "";
 
-    strcat(filePath,"../models/");
+    strcat(filePath,"../Fase4-models/");
     strcat(filePath,argv[argc-1]);
     remove(filePath);
     
@@ -94,118 +141,153 @@ int main(int argc, char** argv){
         file << "plane" << endl;
         float length = stof(argv[2]);
         int divisions = stoi(argv[3]);
+        float textureStep = (float) 1.0f/divisions;
 
         for(int i = 0; i < divisions;i++){
             file << "GL_TRIANGLE_STRIP" << endl;
-            for(int j = 0; j <= divisions;j++){
-                file << length/2 - j*(length/divisions) << endl;
-                file << 0 << endl;
-                file << length/2 - i*(length/divisions) << endl;
-                file << length/2 - j*(length/divisions) << endl;
-                file << 0 << endl;
-                file << length/2 - (i+1)*(length/divisions) << endl;
-            }
-            file << "GL_END" << endl;
 
-            file << "GL_TRIANGLE_STRIP" << endl;
+            float t0 = i * textureStep, t1 = (i+1)*textureStep;
+
             for(int j = 0; j <= divisions;j++){
-                file << length/2 - j*(length/divisions) << endl;
-                file << 0 << endl;
-                file << length/2 - (i+1)*(length/divisions) << endl;
-                file << length/2 - j*(length/divisions) << endl;
-                file << 0 << endl;
-                file << length/2 - i*(length/divisions) << endl;
+                // file format - Point x;Normal x;Texture x;\n Point y;Normal y;Texture y;\nPoint z;Normal z;Texture z; 
+                // being a plane, the normal is always the same - (0,1,0)
+
+                float s = 1 - (j * textureStep);
+
+                file << length/2 - j*(length/divisions) << ";" << 0 << ";" << s << endl;
+                file << 0 << ";" << 1 << ";" << t0 << endl;
+                file << length/2 - i*(length/divisions) << ";" << 0 << endl;
+
+                //Next point
+                file << length/2 - j*(length/divisions) << ";" << 0 << ";" << s << endl;
+                file << 0 << ";" << 1 << ";" << t1 << endl;
+                file << length/2 - (i+1)*(length/divisions) << ";" << 0 << endl;
             }
             file << "GL_END" << endl;
         }
     }
-
-    if (primitive.compare("box") == 0) {
+    else if (primitive.compare("box") == 0) {
         file << "box" << endl;
         float length = stof(argv[2]);
         int divisions = stoi(argv[3]);
         float half = length / 2.0f;
         float step = length / divisions;
+        float textureStep = (float) 1.0f/divisions;
 
         for (int i = 0; i < divisions; i++) {
-            //Bottom face
+            //Bottom face - Normal equals (0,-1,0)
+            float t0 = 1 - (i * textureStep), t1 = 1 - ((i+1)*textureStep);
+
             file << "GL_TRIANGLE_STRIP" << endl;
             for(int j = 0; j <= divisions; j++){
-                file << half - j*step << endl;
-                file << -half << endl;
-                file << half - (i+1)*step << endl;
-                file << half - j*step << endl;
-                file << -half << endl;
-                file << half - i*step << endl;
+                float s = j*textureStep;
+
+                file << half - j*step << ";" << 0 << ";" << s << endl;
+                file << -half << ";" << -1 << ";" << t1 << endl;
+                file << half - (i+1)*step << ";" << 0 << endl;
+
+                //Next point
+                file << half - j*step << ";" << 0 << ";" << s << endl;
+                file << -half << ";" << -1 << ";" << t0 << endl;
+                file << half - i*step << ";" << 0 << endl;
             }
             file << "GL_END" << endl;
         }
 
         for(int i = 0; i < divisions; i++){
-            //Top face
+            //Top face - Normal equals (0,1,0)
+            float t0 = i * textureStep, t1 = (i+1)*textureStep;
+
             file << "GL_TRIANGLE_STRIP" << endl;
             for(int j = 0; j <= divisions; j++){
-                file << half - j*step << endl;
-                file << half << endl;
-                file << half - i*step << endl;
-                file << half - j*step << endl;
-                file << half << endl;
-                file << half - (i+1)*step << endl;
+                float s = 1 - (j*textureStep);
+
+                file << half - j*step << ";" << 0 << ";" << s << endl;
+                file << half << ";" << 1 << ";" << t0 << endl;
+                file << half - i*step << ";" << 0 << endl;
+
+                //Next point
+                file << half - j*step << ";" << 0 << ";" << s << endl;
+                file << half << ";" << 1 << ";" << t1 << endl;
+                file << half - (i+1)*step << ";" << 0 << endl;
             }
             file << "GL_END" << endl;
         }
 
         for(int i = 0; i < divisions; i++){
-            //-X face
+            //-X face - Normal equals (-1,0,0)
+            float t0 = 1 - (i * textureStep), t1 = 1 - ((i+1)*textureStep);
+            
             file << "GL_TRIANGLE_STRIP" << endl;
             for(int j = 0; j <= divisions; j++){
-                file << -half << endl;
-                file << half - j*step << endl;
-                file << half - i*step << endl;
-                file << -half << endl;
-                file << half - j*step << endl;
-                file << half - (i+1)*step << endl;
+                float s = 1 - (j*textureStep);
+
+                file << -half << ";" << -1 << ";" << t0 << endl;
+                file << half - j*step << ";" << 0 << ";" << s << endl;
+                file << half - i*step << ";" << 0 << endl;
+
+                //Next point
+                file << -half << ";" << -1 << ";" << t1 << endl;
+                file << half - j*step << ";" << 0 << ";" << s << endl;
+                file << half - (i+1)*step << ";" << 0 << endl;
             }
             file << "GL_END" << endl;
         }
 
         for(int i = 0; i < divisions; i++){
-            //+X face
+            //+X face - Normal equals (1,0,0)
+            float t0 = 1 - (i * textureStep), t1 = 1 - ((i+1)*textureStep);
+            
             file << "GL_TRIANGLE_STRIP" << endl;
             for(int j = 0; j <= divisions; j++){
-                file << half << endl;
-                file << half - j*step << endl;
-                file << half - (i+1)*step << endl;
-                file << half << endl;
-                file << half - j*step << endl;
-                file << half - i*step << endl;
+                float s = j*textureStep;
+
+                file << half << ";" << 1 << ";" << t1 << endl;
+                file << half - j*step << ";" << 0 << ";" << s << endl;
+                file << half - (i+1)*step << ";" << 0 << endl;
+
+                //Next point
+                file << half << ";" << 1 << ";" << t0 << endl;
+                file << half - j*step << ";" << 0 << ";" << s << endl;
+                file << half - i*step << ";" << 0 << endl;
             }
             file << "GL_END" << endl;
         }
 
         for(int i = 0; i < divisions; i++){
-            //-Z face
+            //-Z face - Normal equals (0,0,-1)
+            float t0 = 1 - (i * textureStep), t1 = 1 - ((i+1)*textureStep);
+
             file << "GL_TRIANGLE_STRIP" << endl;
             for(int j = 0; j <= divisions; j++){
-                file << half - j*step << endl;
-                file << half - i*step << endl;
-                file << -half << endl;
-                file << half - j*step << endl;
-                file << half - (i+1)*step << endl;
-                file << -half << endl;
+                float s = j*textureStep;
+
+                file << half - j*step << ";" << 0 << ";" << s << endl;
+                file << half - i*step << ";" << 0 << ";" << t0 << endl;
+                file << -half << ";" << -1 << endl;
+
+                //Next point
+                file << half - j*step << ";" << 0 << ";" << s << endl;
+                file << half - (i+1)*step << ";" << 0 << ";" << t1 << endl;
+                file << -half << ";" << -1 << endl;
             }
             file << "GL_END" << endl;
         }
         for(int i = 0; i < divisions; i++){
-            //+Z face
+            //+Z face - Normal equals (0,0,1)
+            float t0 = 1 - (i * textureStep), t1 = 1 - ((i+1)*textureStep);
+
             file << "GL_TRIANGLE_STRIP" << endl;
             for(int j = 0; j <= divisions; j++){
-                file << half - j*step << endl;
-                file << half - (i+1)*step << endl;
-                file << half << endl;
-                file << half - j*step << endl;
-                file << half - i*step << endl;
-                file << half << endl;
+                float s = 1 - j*textureStep;
+                file << half - j*step << ";" << 0 << ";" << s << endl;
+                file << half - (i+1)*step << ";" << 0 << ";" << t1 << endl;
+                file << half << ";" << 1 << endl;
+
+                //Next point
+                file << half - j*step << ";" << 0 << ";" << s << endl;
+                file << half - i*step << ";" << 0 << ";" << t0 << endl;
+                file << half << ";" << 1 << endl;
             }
             file << "GL_END" << endl;
         }
@@ -220,19 +302,25 @@ int main(int argc, char** argv){
         float angleStep = 360 / slices;
         float heightStep = height / stacks;
         float ratio = radius / height;
+        float sideLength = sqrt((radius*radius) + (height*height));
 
-        // Base circle of the cone
+        float textureStackStep = (float) 1.0f / stacks;
+        float textureSliceStep = (float) 1.0f / slices;
+
+        // Base circle of the cone - Normal equals (0,-1-0)
         file << "GL_TRIANGLE_FAN" << endl;
-        // Vertex at the top
-        file << 0.0f << endl;
-        file << 0.0f << endl;
-        file << 0.0f << endl;
+        // Vertex on the middle
 
-        for (int i = 0; i < slices; i++) {
+        file << 0.0f << ";" << 0 << ";" << 0 << endl;
+        file << 0.0f << ";" << -1 << ";" << 1 << endl;
+        file << 0.0f << ";" << 0 << endl;
+
+        for (int i = 0; i <= slices; i++) {
             float angle = i * angleStep *  M_PI/180;
-            file << radius * -sin(angle) << endl;
-            file << 0.0f << endl;
-            file << radius * cos(angle) << endl;
+
+            file << radius * -sin(angle) << ";" << 0 << ";" << 0 << endl;
+            file << 0.0f << ";" << -1 << ";" << 0 << endl;
+            file << radius * cos(angle) << ";" << 0 << endl;
         }
         file << "GL_END" << endl;
 
@@ -240,25 +328,37 @@ int main(int argc, char** argv){
         for(int i = 0; i < slices; i++){
             file << "GL_TRIANGLE_STRIP" << endl;
             // Vertex at the top
-            file << 0.0f << endl;
-            file << height << endl;
-            file << 0.0f << endl;
+            file << 0.0f << ";" << 0 << ";" << i*textureSliceStep << endl;
+            file << height << ";" << 1 << ";" << 1 << endl;
+            file << 0.0f << ";" << 0 << endl;
+
+            float angle = i * angleStep *  M_PI/180;
+            float nextAngle = (i+1) * angleStep *  M_PI/180;
 
             for(int j = 0; j < stacks; j++){
-
-                float angle = i * angleStep *  M_PI/180;
-                float nextAngle = (i+1) * angleStep *  M_PI/180;
 
                 float stackHeight = height - heightStep*(j+1);
                 float stackRadius = (height - stackHeight) * ratio;
 
-                file << stackRadius * sin(angle) << endl;
-                file << stackHeight << endl;
-                file << stackRadius * cos(angle) << endl;
+                float t = 1.0f - (j+1)*textureStackStep;
+                float s1 = i * textureSliceStep;
+                float s0 = (i+1) * textureSliceStep;
 
-                file << stackRadius * sin(nextAngle) << endl;
-                file << stackHeight << endl;
-                file << stackRadius * cos(nextAngle) << endl;
+                float y = (float) sin(M_PI - atan(height/radius));
+
+                float a[3] = {sin(angle),y,cos(angle)};
+                float b[3] = {sin(nextAngle),y,cos(nextAngle)};
+
+                normalize(a);
+                normalize(b);
+
+                file << stackRadius * sin(angle) << ";" << a[0] << ";" << s0 << endl;
+                file << stackHeight << ";" << a[1] << ";" << t << endl;
+                file << stackRadius * cos(angle) << ";" << a[2] << endl;
+
+                file << stackRadius * sin(nextAngle) << ";" << b[0] << ";" << s1 << endl;
+                file << stackHeight << ";" << b[1] << ";" << t << endl;
+                file << stackRadius * cos(nextAngle) << ";" << b[2] << endl;
             }
             file << "GL_END" << endl;
 
@@ -274,35 +374,46 @@ int main(int argc, char** argv){
         float angleStepH = 2*M_PI / slices;
         float angleStepV = M_PI / stacks;
 
+        float textureSliceStep = (float) 1.0f / slices;
+        float textureStackStep = (float) 1.0f / stacks;
+
         for(int i = 0; i < slices; i++){
             file << "GL_TRIANGLE_STRIP" << endl;
 
             // Vertex at the top
-            file << 0.0f << endl;
-            file << radius << endl;
-            file << 0.0f << endl;
+            file << 0.0f << ";" << 0 << ";" << i*textureSliceStep + 0.5*textureSliceStep << endl;
+            file << radius << ";" << 1 << ";" << 1 << endl;
+            file << 0.0f << ";" << 0 << endl;
 
-            for(int j = 0; j < stacks-1; j++){
+            for(int j = 1; j < stacks; j++){
 
-                float angleV = (j+1) * angleStepV;
+                float angleV = j * angleStepV;
                 float angleH = i * angleStepH;
                 float nextAngleH = (i+1) * angleStepH;
 
-                float y = cos(angleV);
+                float x = radius * sin(angleH) * sin(angleV), nX = radius * sin(nextAngleH) * sin(angleV);
+                float y = radius * cos(angleV);
+                float z = radius * cos(angleH) * sin(angleV), nZ = radius * cos(nextAngleH) * sin(angleV);
 
-                file << radius * sin(angleH) * sin(angleV) << endl;
-                file << radius * y << endl;
-                file << radius * cos(angleH) * sin(angleV) << endl;
+                float a[3] = {x,y,z};
+                float b[3] = {nX,y,nZ};
 
-                file << radius * sin(nextAngleH) * sin(angleV) << endl;
-                file << radius * y << endl;
-                file << radius * cos(nextAngleH) * sin(angleV) << endl;
+                normalize(a);
+                normalize(b);
+
+                file << x << ";" << a[0] << ";" << i*textureSliceStep << endl;
+                file << y << ";" << a[1] << ";" << 1.0f - j*textureStackStep << endl;
+                file << z << ";" << a[2] << endl;
+
+                file << nX << ";" << b[0] << ";" << (i+1)*textureSliceStep << endl;
+                file << y << ";" << b[1] << ";" << 1.0f - j*textureStackStep << endl;
+                file << nZ << ";" << b[2] << endl;
             }
 
             // Vertex at the bottom
-            file << 0.0f << endl;
-            file << -radius << endl;
-            file << 0.0f << endl;
+            file << 0.0f << ";" << 0 << ";" << i*textureSliceStep + 0.5*textureSliceStep << endl;
+            file << -radius << ";" << -1 << ";" << 0 << endl;
+            file << 0.0f << ";" << 0 << endl;
 
             file << "GL_END" << endl;
 
@@ -318,6 +429,9 @@ int main(int argc, char** argv){
         float sliceStep = 2 * M_PI / slices;
         float stackStep = 2 * M_PI / stacks;
 
+        float textureStackStep = (float) 1.0f / stacks;
+        float textureSliceStep = (float) 2.0f / slices;
+
         for (int i = 0; i < stacks; i++) {
             file << "GL_TRIANGLE_STRIP" << endl;
 
@@ -327,13 +441,25 @@ int main(int argc, char** argv){
             for (int j = 0; j <= slices; j++) {
                 float sliceAngle = j * sliceStep;
 
-                file << (outerRadius + innerRadius * cos(sliceAngle)) * cos(stackAngle) << endl;
-                file << innerRadius * sin(sliceAngle) << endl;
-                file << (outerRadius + innerRadius * cos(sliceAngle)) * sin(stackAngle) << endl;
+                float x = (outerRadius + innerRadius * cos(sliceAngle)) * cos(stackAngle), z = (outerRadius + innerRadius * cos(sliceAngle)) * sin(stackAngle);
+                float y = -(innerRadius * sin(sliceAngle));
+                float nX = (outerRadius + innerRadius * cos(sliceAngle)) * cos(nextStackAngle), nZ = (outerRadius + innerRadius * cos(sliceAngle)) * sin(nextStackAngle);
 
-                file << (outerRadius + innerRadius * cos(sliceAngle)) * cos(nextStackAngle) << endl;
-                file << innerRadius * sin(sliceAngle) << endl;
-                file << (outerRadius + innerRadius * cos(sliceAngle)) * sin(nextStackAngle) << endl;
+                float a[3] = {x,y,z}, b[3] = {nX,y,nZ};
+                normalize(a);
+                normalize(b);
+
+                float t = j * textureSliceStep;
+
+                if (t > 1) t = 2 - t;
+
+                file << x << ";" << a[0] << ";" << t << endl;
+                file << y << ";" << a[1] << ";" << 0 << endl;
+                file << z << ";" << a[2] << endl;
+
+                file << nX << ";" << b[0] << ";" << t << endl;
+                file << y << ";" << b[1] << ";" << 1 << endl;
+                file << nZ << ";" << b[2] << endl;
             }
             file << "GL_END" << endl;
         }
@@ -414,17 +540,19 @@ int main(int argc, char** argv){
             for(int j = 0; j < tesselation; j++){
                 file << "GL_TRIANGLE_STRIP" << endl;
                 for(int k = 0; k <= tesselation; k++){
-                    float point[3];
+                    float point[3], normal[3];
                     generatePoint(tesselationStep,j,k,*pontos_x, *pontos_y, *pontos_z, point);
-                    file << point[0] << endl;
-                    file << point[1] << endl;
-                    file << point[2] << endl;
+                    generateNormal(tesselationStep,j,k,*pontos_x, *pontos_y, *pontos_z, normal);
+                    file << point[0] << ';' << normal[0] << ';' << tesselationStep*j << endl;
+                    file << point[1] << ';' << normal[1] << ';' << tesselationStep*k << endl;
+                    file << point[2] << ';' << normal[2] << endl;
 
-                    float nextPoint[3];
+                    float nextPoint[3], nextNormal[3];
                     generatePoint(tesselationStep,j+1,k,*pontos_x, *pontos_y, *pontos_z, nextPoint);
-                    file << nextPoint[0] << endl;
-                    file << nextPoint[1] << endl;
-                    file << nextPoint[2] << endl;
+                    generateNormal(tesselationStep,j+1,k,*pontos_x, *pontos_y, *pontos_z, nextNormal);
+                    file << nextPoint[0] << ';' << nextNormal[0] << ';' << tesselationStep*(j+1) << endl;
+                    file << nextPoint[1] << ';' << nextNormal[1] << ';' << tesselationStep*k << endl;
+                    file << nextPoint[2] << ';' << nextNormal[2] << endl;
                 }
                 file << "GL_END" << endl;
             }
