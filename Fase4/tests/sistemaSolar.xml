@@ -14,7 +14,9 @@
                 <scale x="20" y="20" z="20" />
             </transform>
             <models> 
-                <model file="sphere.3d" dayPeriod="10" /> <!-- generator sphere 1.5 20 20 sphere.3d -->
+                <model file="sphere.3d" dayPeriod="10"> 
+                    <texture file="sun.jpg"/>
+                </model> <!-- generator sphere 1.5 20 20 sphere.3d -->
             </models>
         </group>
 
@@ -26,7 +28,9 @@
                 <scale x="0.60" y="0.60" z="0.60" />
             </transform>
             <models>
-                <model file="sphere.3d" dayPeriod="10" />
+                <model file="sphere.3d" dayPeriod="10"> 
+                    <texture file="mercury.jpg"/>
+                </model>
             </models>
         </group>
 
@@ -38,7 +42,9 @@
                 <scale x="1.2" y="1.2" z="1.2" />
             </transform>
             <models>
-                <model file="sphere.3d" dayPeriod="10" />
+                <model file="sphere.3d" dayPeriod="10"> 
+                    <texture file="venus.jpg"/>
+                </model>
             </models>
         </group>
 
@@ -50,7 +56,9 @@
                 <scale x="1.4" y="1.4" z="1.4"/>
             </transform>
             <models>
-                <model file="sphere.3d" dayPeriod="10" />
+                <model file="sphere.3d" dayPeriod="10"> 
+                    <texture file="earth.jpg"/>
+                </model>
             </models>
 
             <!-- Lua -->
@@ -61,7 +69,9 @@
                     <scale x="0.27" y="0.27" z="0.27" />
                 </transform>
                 <models>
-                    <model file="sphere.3d" dayPeriod="10" />
+                    <model file="sphere.3d" dayPeriod="10"> 
+                    <texture file="moon.jpg"/>
+                </model>
                 </models>
             </group>
         </group>
@@ -74,7 +84,9 @@
                 <scale x="0.8" y="0.8" z="0.8" />
             </transform>
             <models>
-                <model file="sphere.3d" dayPeriod="10" />
+                <model file="sphere.3d" dayPeriod="10"> 
+                    <texture file="mars.jpg"/>
+                </model>
             </models>
         </group>
 
@@ -86,7 +98,9 @@
                 <scale x="11.21" y="11.21" z="11.21" />
             </transform>
             <models>
-                <model file="sphere.3d" dayPeriod="10" />
+                <model file="sphere.3d" dayPeriod="10"> 
+                    <texture file="jupiter.jpg"/>
+                </model>
             </models>
         </group>
 
@@ -94,11 +108,13 @@
         <group>
             <transform>
                 <rotate time="25" x="0" y="1" z="0" />
-                <translate x="0" y="0" z="100" />
+                <translate x="0" y="0" z="160" />
                 <scale x="9.45" y="9.45" z="9.45" />
             </transform>
             <models>
-                <model file="sphere.3d" dayPeriod="10" />
+                <model file="sphere.3d" dayPeriod="10"> 
+                    <texture file="saturn.jpg"/>
+                </model>
             </models>
             
             <!-- Anel de Saturno -->
@@ -106,10 +122,12 @@
                 <transform>
                     <rotate angle="30.0f" x="1" y="0" z="1" />
                     <translate x="0" y="0" z="0" />
-                    <scale x="0.5" y="0.5" z="0.5" />
+                    <scale x="0.2" y="0.2" z="0.2" />
                 </transform>
                 <models>
-                    <model file="torus.3d" dayPeriod="10" /> <!-- generator torus 3 16 2 20 torus.3d -->
+                    <model file="torus.3d" dayPeriod="10"> 
+                        <texture file="saturnringcolor.jpg"/>
+                    </model> <!-- generator torus 3 16 2 20 torus.3d -->
                 </models>
             </group>
         </group>
@@ -118,11 +136,13 @@
         <group>
             <transform>
                 <rotate time="28" x="0" y="1" z="0" />
-                <translate x="120" y="0" z="120" />
+                <translate x="180" y="0" z="180" />
                 <scale x="4.01" y="4.01" z="4.01" />
             </transform>
             <models>
-                <model file="sphere.3d" dayPeriod="10" />
+                <model file="sphere.3d" dayPeriod="10"> 
+                    <texture file="uranus.jpg"/>
+                </model>
             </models>
         </group>
 
@@ -130,11 +150,13 @@
         <group>
             <transform>
                 <rotate time="30" x="0" y="1" z="0" />
-                <translate x="-135" y="0" z="-135" />
+                <translate x="195" y="0" z="-195" />
                 <scale x="3.88" y="3.88" z="3.88" />
             </transform>
             <models>
-                <model file="sphere.3d" dayPeriod="10" />
+                <model file="sphere.3d" dayPeriod="10"> 
+                    <texture file="neptune.jpg"/>
+                </model>
             </models>
         </group>
 
@@ -155,7 +177,9 @@
                     <scale x="1.5" y="1.5" z="1.5" />
                 </transform>
                 <models> 
-                    <model file="bezier_10.3d" /> <!-- generator patch teapot.patch 10 bezier_10.3d -->
+                    <model file="bezier_10.3d"> 
+                        <texture file="teapot.jpg"/>
+                    </model> <!-- generator patch teapot.patch 10 bezier_10.3d -->
                 </models>
             </group>
         </group>

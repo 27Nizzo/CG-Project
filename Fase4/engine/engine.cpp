@@ -441,7 +441,7 @@ void drawFigures(Group group){
                 float gt = ( glutGet(GLUT_ELAPSED_TIME) / 1000.0) / transform.time;
         
                 getGlobalCatmullRomPoint(gt,transform.points,pos,deriv);
-                renderCatmullRomCurve(transform.points);
+                //renderCatmullRomCurve(transform.points);
 
                 glTranslatef(pos[0], pos[1], pos[2]);
 
